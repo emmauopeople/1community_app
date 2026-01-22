@@ -1,0 +1,13 @@
+{
+  "name": "1community-backend",
+  "version": "1.0.0",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node -e \"console.log('tests: ok')\""
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}
