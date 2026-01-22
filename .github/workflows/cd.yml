@@ -45,7 +45,7 @@ jobs:
 
       - name: Update backend image tag in GitOps repo
         run: |
-          echo "IMAGE_NAME=${IMAGE_NAME}"
+          echo "IMAGE_TAG=${IMAGE_TAG}"
           file="gitops/apps/community-backend/kustomization.yaml"
           if [ ! -f "$file" ]; then
             echo "ERROR: $file not found. Create GitOps manifests first."
