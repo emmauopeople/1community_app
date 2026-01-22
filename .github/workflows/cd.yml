@@ -79,15 +79,13 @@ jobs:
             fi
           done
 
-          echo "---- BEFORE (newTag lines) ----"
-          grep -n "newTag" "${file}" || true
+          
 
           # Replace the entire newTag line, preserving indentation
           sed -i -E "s|^([[:space:]]*newTag:[[:space:]]*).*$|\1${IMAGE_TAG}|" "$backend_file"
           sed -i -E "s|^([[:space:]]*newTag:[[:space:]]*).*$|\1${IMAGE_TAG}|" "$frontend_file"
 
-          echo "---- AFTER (newTag lines) ----"
-          grep -n "newTag" "${file}" || true
+          
 
           echo "---- DIFF ----"
           git -C gitops diff -- "${GITOPS_BACKEND_FILE}" || true
