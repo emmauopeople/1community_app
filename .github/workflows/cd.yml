@@ -11,8 +11,10 @@ permissions:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: 1community-app-backend
+  FRONTEND_IMAGE_NAME: 1community-app-frontend
   GITOPS_REPO: 1community_deployment_configurations
-  GITOPS_FILE: apps/community-backend/kustomization.yaml
+  GITOPS_BACKEND_FILE: apps/community-backend/kustomization.yaml
+  GITOPS_FRONTEND_FILE: apps/community-frontend/kustomization.yaml
 
 jobs:
   build-push-and-bump-gitops:
@@ -43,6 +45,14 @@ jobs:
           push: true
           tags: |
             ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+      # 4b) Build & push frontend image
+      - name: Build and push frontend image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./frontend
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.FRONTEND_IMAGE_NAME }}:${{ env.IMAGE_TAG }}
 
       # 5) Checkout GitOps repo (separate repo)
       - name: Checkout GitOps repo
@@ -59,32 +69,33 @@ jobs:
           set -euo pipefail
 
           echo "IMAGE_TAG=${IMAGE_TAG}"
-          file="gitops/${GITOPS_FILE}"
+          backend_file="gitops/${GITOPS_BACKEND_FILE}"
+          frontend_file="gitops/${GITOPS_FRONTEND_FILE}"
 
-          echo "Target file: ${file}"
-          if [ ! -f "${file}" ]; then
-            echo "ERROR: ${file} not found."
-            echo "Repo tree under gitops/apps:"
-            ls -la gitops/apps || true
-            echo "Find kustomization files:"
-            find gitops -maxdepth 4 -type f -name "kustomization.y*ml" -print || true
-            exit 1
-          fi
+          for f in "$backend_file" "$frontend_file"; do
+            if [ ! -f "$f" ]; then
+                echo "ERROR: $f not found."
+              exit 1
+            fi
+          done
 
           echo "---- BEFORE (newTag lines) ----"
           grep -n "newTag" "${file}" || true
 
           # Replace the entire newTag line, preserving indentation
-          sed -i -E "s|^([[:space:]]*newTag:[[:space:]]*).*$|\1${IMAGE_TAG}|" "${file}"
+          sed -i -E "s|^([[:space:]]*newTag:[[:space:]]*).*$|\1${IMAGE_TAG}|" "$backend_file"
+          sed -i -E "s|^([[:space:]]*newTag:[[:space:]]*).*$|\1${IMAGE_TAG}|" "$frontend_file"
 
           echo "---- AFTER (newTag lines) ----"
           grep -n "newTag" "${file}" || true
 
           echo "---- DIFF ----"
-          git -C gitops diff -- "${GITOPS_FILE}" || true
+          git -C gitops diff -- "${GITOPS_BACKEND_FILE}" || true
+          git -C gitops diff -- "${GITOPS_FRONTEND_FILE}" || true
 
           # Stage the change
-          git -C gitops add "${GITOPS_FILE}"
+          git -C gitops add "${GITOPS_BACKEND_FILE}"
+          git -C gitops add "${GITOPS_FRONTEND_FILE}"
           git -C gitops status
 
       # 7) Create a PR to GitOps repo
