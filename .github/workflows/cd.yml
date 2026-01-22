@@ -2,7 +2,7 @@ name: CD
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
 
 permissions:
   contents: read
@@ -11,16 +11,23 @@ permissions:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: 1community-app-backend
+  GITOPS_REPO: 1community_deployment_configurations
+  GITOPS_FILE: apps/community-backend/kustomization.yaml
 
 jobs:
   build-push-and-bump-gitops:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
 
+    steps:
+      # 1) Checkout application repo (this repo)
+      - name: Checkout app repo
+        uses: actions/checkout@v4
+
+      # 2) Set immutable image tag
       - name: Set image tag
         run: echo "IMAGE_TAG=sha-${GITHUB_SHA}" >> $GITHUB_ENV
 
+      # 3) Login to GitHub Container Registry
       - name: Login to GHCR
         uses: docker/login-action@v3
         with:
@@ -28,6 +35,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      # 4) Build & push backend image
       - name: Build and push backend image
         uses: docker/build-push-action@v6
         with:
@@ -36,25 +44,50 @@ jobs:
           tags: |
             ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
 
+      # 5) Checkout GitOps repo (separate repo)
       - name: Checkout GitOps repo
         uses: actions/checkout@v4
         with:
-          repository: ${{ github.repository_owner }}/1community_deployment_configurations
+          repository: ${{ github.repository_owner }}/${{ env.GITOPS_REPO }}
           token: ${{ secrets.DEPLOY_REPO_TOKEN }}
           path: gitops
 
+      # 6) Update image tag in GitOps repo (robust + debug)
       - name: Update backend image tag in GitOps repo
+        shell: bash
         run: |
+          set -euo pipefail
+
           echo "IMAGE_TAG=${IMAGE_TAG}"
-          file="gitops/apps/community-backend/kustomization.yaml"
-          if [ ! -f "$file" ]; then
-            echo "ERROR: $file not found. Create GitOps manifests first."
+          file="gitops/${GITOPS_FILE}"
+
+          echo "Target file: ${file}"
+          if [ ! -f "${file}" ]; then
+            echo "ERROR: ${file} not found."
+            echo "Repo tree under gitops/apps:"
+            ls -la gitops/apps || true
+            echo "Find kustomization files:"
+            find gitops -maxdepth 4 -type f -name "kustomization.y*ml" -print || true
             exit 1
           fi
-          sed -i "s|newTag:.*|newTag: ${IMAGE_TAG}|" "$file"
-          git -C gitops add "apps/community-backend/kustomization.yaml"
+
+          echo "---- BEFORE (newTag lines) ----"
+          grep -n "newTag" "${file}" || true
+
+          # Replace the entire newTag line, preserving indentation
+          sed -i -E "s|^([[:space:]]*newTag:[[:space:]]*).*$|\1${IMAGE_TAG}|" "${file}"
+
+          echo "---- AFTER (newTag lines) ----"
+          grep -n "newTag" "${file}" || true
+
+          echo "---- DIFF ----"
+          git -C gitops diff -- "${GITOPS_FILE}" || true
+
+          # Stage the change
+          git -C gitops add "${GITOPS_FILE}"
           git -C gitops status
 
+      # 7) Create a PR to GitOps repo
       - name: Create PR to GitOps repo
         uses: peter-evans/create-pull-request@v6
         with:
@@ -62,6 +95,9 @@ jobs:
           path: gitops
           commit-message: "chore: bump backend image to ${{ env.IMAGE_TAG }}"
           title: "Deploy backend ${{ env.IMAGE_TAG }}"
-          body: "Automated image bump from 1community_app. Tag: `${{ env.IMAGE_TAG }}`"
+          body: |
+            Automated image bump from 1community_app.
+            Image: `${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}`
           branch: "deploy/backend-${{ env.IMAGE_TAG }}"
           base: "main"
+          delete-branch: true
