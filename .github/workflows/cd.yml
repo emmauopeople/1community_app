@@ -51,6 +51,7 @@ jobs:
             exit 1
           fi
           sed -i "s|newTag:.*|newTag: ${IMAGE_TAG}|" "$file"
+          git -C gitops add "apps/community-backend/kustomization.yaml"
           git -C gitops status
 
       - name: Create PR to GitOps repo
