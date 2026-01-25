@@ -8,6 +8,12 @@
     "test": "node -e \"console.log('tests: ok')\""
   },
   "dependencies": {
-    "express": "^4.19.2"
-  }
+    "dotenv": "^17.2.3",
+    "express": "^4.22.1",
+    "pg": "^8.17.2"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": ""
 }

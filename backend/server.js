@@ -1,8 +1,7 @@
-const express = require("express");
-
-const app = express();
-app.use(express.json());
-
+// server.js
+require("dotenv").config();
+const app = require("./src/app");
+const db = require("./db");
 const PORT = process.env.PORT || 3000;
 
 app.get("/healthz", (req, res) => res.status(200).json({ ok: true }));
