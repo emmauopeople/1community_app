@@ -26,3 +26,14 @@ export default [
     },
   },
 ];
+
+
+module.exports = {
+  // ...your existing config...
+  overrides: [
+    {
+      files: ["tests/**/*.test.js", "tests/**/*.spec.js", "tests/**/*.js"],
+      env: { jest: true, node: true },
+    },
+  ],
+};
