@@ -2,6 +2,7 @@ import js from "@eslint/js";
 import prettier from "eslint-plugin-prettier";
 
 export default [
+  // Main JS config
   {
     files: ["**/*.js"],
     languageOptions: {
@@ -26,9 +27,27 @@ export default [
     },
   },
 
-  // Your Jest overrides, now in ESM form
+  // Jest overrides (Flat Config style)
   {
     files: ["tests/**/*.test.js", "tests/**/*.spec.js", "tests/**/*.js"],
-    env: { jest: true, node: true },
+    languageOptions: {
+      globals: {
+        // Jest globals
+        describe: "readonly",
+        test: "readonly",
+        it: "readonly",
+        expect: "readonly",
+        beforeAll: "readonly",
+        beforeEach: "readonly",
+        afterAll: "readonly",
+        afterEach: "readonly",
+
+        // Node globals
+        module: "readonly",
+        require: "readonly",
+        process: "readonly",
+        __dirname: "readonly",
+      },
+    },
   },
 ];
