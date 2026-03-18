@@ -1,25 +1,75 @@
-name: CI
+name: CI (dev)
 
 on:
-  pull_request:
   push:
-    branches: [ "main" ]
+    branches: ["dev"]
+  pull_request:
+    branches: ["dev"]
 
 permissions:
   contents: read
+  security-events: write
 
 jobs:
-  test-backend:
+  backend-ci:
+    name: Backend - lint (if present), test (jest), snyk
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: backend
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
           node-version: "20"
           cache: "npm"
           cache-dependency-path: backend/package-lock.json
-      - run: npm ci
-      - run: npm test
+
+      - name: Install backend deps
+        working-directory: backend
+        run: npm ci
+
+      # Lint: only runs if backend/package.json has a lint script
+      - name: Lint backend (if script exists)
+        working-directory: backend
+        shell: bash
+        run: |
+          if node -e "const p=require('./package.json'); process.exit(p.scripts && p.scripts.lint ? 0 : 1)"; then
+            echo "Running lint..."
+            npm run lint
+          else
+            echo "No lint script found. Skipping."
+          fi
+
+      - name: Test backend (Jest)
+        working-directory: backend
+        run: npm test
+
+      # Snyk: requires SNYK_TOKEN secret
+      - name: Snyk security scan (backend)
+        uses: snyk/actions/node@master
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          command: test
+          args: --severity-threshold=medium --file=backend/package-lock.json
+
+  codeql:
+    name: CodeQL (quality/security scan)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v3
+
+      - name: Analyze
+        uses: github/codeql-action/analyze@v3
