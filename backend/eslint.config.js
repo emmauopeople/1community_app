@@ -31,6 +31,15 @@ export default [
   {
     files: ["tests/**/*.test.js", "tests/**/*.spec.js", "tests/**/*.js"],
     languageOptions: {
+      sourceType: "module",
+      ecmaVersion: "latest",
+      parserOptions: {
+        ecmaVersion: "latest",
+        sourceType: "module",
+        ecmaFeatures: {
+          topLevelAwait: true,
+        },
+      },
       globals: {
         // Jest globals
         describe: "readonly",
