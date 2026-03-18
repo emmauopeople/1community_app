@@ -25,15 +25,10 @@ export default [
       "no-empty": ["error", { allowEmptyCatch: true }],
     },
   },
+
+  // Your Jest overrides, now in ESM form
+  {
+    files: ["tests/**/*.test.js", "tests/**/*.spec.js", "tests/**/*.js"],
+    env: { jest: true, node: true },
+  },
 ];
-
-
-module.exports = {
-  // ...your existing config...
-  overrides: [
-    {
-      files: ["tests/**/*.test.js", "tests/**/*.spec.js", "tests/**/*.js"],
-      env: { jest: true, node: true },
-    },
-  ],
-};
