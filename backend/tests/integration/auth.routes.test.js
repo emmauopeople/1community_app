@@ -9,6 +9,7 @@ const mockGetLoginAttempt = jest.fn();
 const mockRecordLoginFailure = jest.fn();
 const mockResetLoginAttempts = jest.fn();
 
+
 jest.unstable_mockModule("../../db.js", () => ({
   query: (...args) => mockQuery(...args),
 }));
