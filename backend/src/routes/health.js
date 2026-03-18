@@ -1,16 +1,13 @@
-// src/routes/health.js
-const express = require("express");
-const db = require("../../db"); 
+import express from "express";
+import { query } from "../../db.js"; // db.js is at backend/db.js
 
 const router = express.Router();
 
-// Liveness (no DB dependency)
 router.get("/healthz", (req, res) => res.status(200).json({ ok: true }));
 
-// Readiness (DB check)
 router.get("/health/db", async (req, res) => {
   try {
-    await db.query("SELECT 1");
+    await query("SELECT 1");
     return res.status(200).json({ ok: true, db: "up" });
   } catch (err) {
     return res.status(503).json({
@@ -21,4 +18,4 @@ router.get("/health/db", async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;
