@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 dotenv.config();
 import app from "./src/app.js";
 const PORT = process.env.PORT || 3000;
+app.set("trust proxy", 1);
 
 app.get("/healthz", (req, res) => res.status(200).json({ ok: true }));
 app.get("/api/hello", (req, res) =>
