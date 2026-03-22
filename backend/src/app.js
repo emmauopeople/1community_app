@@ -17,13 +17,28 @@ import profileRoutes from "./routes/profile.js";
 const app = express();
 
 app.use(helmet());
-const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+
+// Allow both production domains + localhost for development
+const allowedOrigins = [
+  "https://www.cameroonskills.org",
+  "https://cameroonskills.org",
+  "http://localhost:5173"
+];
+
 app.use(
   cors({
-    origin: frontendUrl,
+    origin: function (origin, callback) {
+      // Allow requests with no origin (mobile apps, curl, etc.)
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
-  }),
+  })
 );
+
 app.use(express.json());
 app.use(sessionMiddleware());
 
@@ -35,7 +50,7 @@ app.use(
     max: 100,
     standardHeaders: true,
     legacyHeaders: false,
-  }),
+  })
 );
 
 app.use(healthRoutes);
@@ -53,7 +68,7 @@ app.get("/api/hello", (req, res) =>
     message: "Hello from 1community backend up 👋",
     env: process.env.NODE_ENV || "dev",
     time: new Date().toISOString(),
-  }),
+  })
 );
 
 export default app;
