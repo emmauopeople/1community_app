@@ -1,24 +1,55 @@
-import { useEffect, useState } from "react";
+import React from "react";
+import { Routes, Route, Navigate } from "react-router-dom";
+
+import LandingPage from "./pages/Landing/LandingPage.jsx";
+import ProviderAuth from "./pages/Provider/ProviderAuth.jsx";
+import ProviderPortal from "./pages/Provider/ProviderPortal.jsx";
+import SearchPage from "./pages/Search/SearchPage.jsx";
+
+import { AuthProvider } from "./app/state/auth.store.jsx";
+import ProviderGuard from "./app/guards/ProviderGuard.jsx";
+import ProviderProfile from "./pages/Provider/ProviderProfile.jsx";
+
+// keep this import if your file is here
+import ProviderSkills from "./app/pages/provider/ProviderSkills.jsx";
 
 export default function App() {
-  const [data, setData] = useState(null);
-  const [err, setErr] = useState(null);
-
-  useEffect(() => {
-    fetch("/api/hello")
-      .then((r) => r.json())
-      .then(setData)
-      .catch((e) => setErr(String(e)));
-  }, []);
-
   return (
-    <div style={{ fontFamily: "system-ui", padding: 24 }}>
-      <h1>1Community Frontend</h1>
-      <p>React served by Nginx (GitOps via ArgoCD)</p>
+    <AuthProvider>
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/provider/auth" element={<ProviderAuth />} />
 
-      <h2>Backend response</h2>
-      {err && <pre style={{ color: "crimson" }}>{err}</pre>}
-      {data ? <pre>{JSON.stringify(data, null, 2)}</pre> : <p>Loading...</p>}
-    </div>
+        <Route
+          path="/provider/portal"
+          element={
+            <ProviderGuard>
+              <ProviderPortal />
+            </ProviderGuard>
+          }
+        />
+
+        <Route
+          path="/provider/skills"
+          element={
+            <ProviderGuard>
+              <ProviderSkills />
+            </ProviderGuard>
+          }
+        />
+
+        <Route
+          path="/provider/profile"
+          element={
+            <ProviderGuard>
+              <ProviderProfile />
+            </ProviderGuard>
+          }
+        />
+
+        <Route path="/search" element={<SearchPage />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </AuthProvider>
   );
 }
