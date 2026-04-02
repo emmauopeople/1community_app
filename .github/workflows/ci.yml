@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   backend-ci:
-    name: Backend - lint (if present), test (jest), snyk
+    name: Backend - lint, test, snyk
     runs-on: ubuntu-latest
 
     steps:
@@ -30,24 +30,21 @@ jobs:
         working-directory: backend
         run: npm ci
 
-      # Lint: only runs if backend/package.json has a lint script
       - name: Lint backend (if script exists)
         working-directory: backend
         shell: bash
         run: |
           if node -e "const p=require('./package.json'); process.exit(p.scripts && p.scripts.lint ? 0 : 1)"; then
-            echo "Running lint..."
             npm run lint
           else
             echo "No lint script found. Skipping."
           fi
 
-      - name: Test backend (Jest)
+      - name: Test backend
         working-directory: backend
         run: npm test
 
-      # Snyk: requires SNYK_TOKEN secret
-      - name: Snyk security scan (backend)
+      - name: Snyk scan
         uses: snyk/actions/node@master
         continue-on-error: true
         env:
@@ -57,8 +54,9 @@ jobs:
           args: --severity-threshold=medium --file=backend/package-lock.json
 
   codeql:
-    name: CodeQL (quality/security scan)
+    name: CodeQL
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
