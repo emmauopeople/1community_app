@@ -70,13 +70,20 @@ jobs:
 
             echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u "${{ secrets.GHCR_USERNAME }}" --password-stdin || true
 
-            cat > .env.deploy << EOF
-            AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
-            AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
-            AWS_REGION=${{ secrets.AWS_REGION }}
-            BACKEND_IMAGE_TAG=sha-${GITHUB_SHA}
-            FRONTEND_IMAGE_TAG=sha-${GITHUB_SHA}
-            EOF
+            TAG=sha-${GITHUB_SHA}
+
+            # Write CI/CD-managed variables
+            cat > .env.deploy <<EOF
+AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
+AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
+AWS_REGION=${{ secrets.AWS_REGION }}
+BACKEND_IMAGE_TAG=$TAG
+FRONTEND_IMAGE_TAG=$TAG
+EOF
+
+            # Export tags so Docker Compose can interpolate them
+            export BACKEND_IMAGE_TAG=$TAG
+            export FRONTEND_IMAGE_TAG=$TAG
 
             docker compose pull
             docker compose up -d --remove-orphans
