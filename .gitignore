@@ -67,6 +67,7 @@ web_modules/
 
 # dotenv environment variable files
 .env
+docker-compose-config/work-space
 
 backend/dblocal.js
 
