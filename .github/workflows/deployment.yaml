@@ -88,6 +88,6 @@ jobs:
             export BACKEND_IMAGE_TAG=$TAG
             export FRONTEND_IMAGE_TAG=$TAG
 
-            docker compose pull
-            docker compose up -d --remove-orphans
-            docker image prune -f
+            sudo docker compose pull
+            sudo docker compose up -d --remove-orphans
+            sudo docker image prune -f
