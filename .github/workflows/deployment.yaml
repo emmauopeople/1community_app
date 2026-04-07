@@ -90,7 +90,7 @@ jobs:
             set -a
             source .env.deploy
             set +a
-
+            docker compose down --remove-orphans
             docker compose pull
             docker compose up -d --remove-orphans
             docker image prune -f

@@ -13,10 +13,12 @@ import analyticsRoutes from "./routes/analytics.js";
 import mediaRoutes from "./routes/media.js";
 import contactRoutes from "./routes/contact.js";
 import profileRoutes from "./routes/profile.js";
+import metricsRoutes from "./routes/metrics.js";
 
 const app = express();
 
 app.use(helmet());
+app.use("/metrics", metricsRoutes);
 
 // Allow both production domains + localhost for development
 const allowedOrigins = [
