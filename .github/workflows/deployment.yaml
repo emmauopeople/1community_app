@@ -88,9 +88,9 @@ jobs:
 
             # Load .env.deploy into shell so Compose can interpolate image tags
             set -a
-            source .env.deploy
+            [ -f .env.deploy ] && source .env.deploy
             set +a
-            docker compose down --remove-orphans
+            
             docker compose pull
-            docker compose up -d --remove-orphans
+            docker compose up -d --force-recreate --remove-orphans
             docker image prune -f
