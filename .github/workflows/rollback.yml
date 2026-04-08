@@ -1,0 +1,43 @@
+name: Rollback Deployment
+
+on:
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: "Enter the SHA tag to roll back to (e.g., sha-9f2d88)"
+        required: true
+
+jobs:
+  rollback:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Roll back on VPS
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.OVH_HOST }}
+          username: ${{ secrets.OVH_USER }}
+          key: ${{ secrets.OVH_SSH_PRIVATE_KEY }}
+          port: ${{ secrets.OVH_SSH_PORT }}
+          script: |
+            cd /home/ubuntu/myapp
+
+            echo "Writing rollback version to .env.deploy"
+            cat > .env.deploy << EOF
+            BACKEND_IMAGE_TAG=${{ github.event.inputs.image_tag }}
+            FRONTEND_IMAGE_TAG=${{ github.event.inputs.image_tag }}
+            EOF
+
+            echo "Reloading environment"
+            set -a
+            source .env.deploy
+            set +a
+
+            echo "Pulling rollback images"
+            docker compose pull
+
+            echo "Recreating containers"
+            docker compose up -d --force-recreate --remove-orphans
+
+            echo "Cleaning unused images"
+            docker image prune -f
