@@ -507,7 +507,7 @@ export default function LandingPage() {
       <footer className="w-full bg-white border-t border-slate-200">
         <div className="w-full px-4 sm:px-6 lg:px-10 py-4">
           <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm">
-            <Link to="/about" className="text-slate-700 hover:text-blue-600">About</Link>
+            <Link to="/about" className="text-slate-700 hover:text-blue-600">About one community</Link>
             <Link id="footer-contact" to="/contact" className="text-slate-700 hover:text-blue-600">Contact</Link>
             <Link id="footer-terms" to="/terms" className="text-slate-700 hover:text-blue-600">Terms</Link>
             <Link id="footer-privacy" to="/privacy" className="text-slate-700 hover:text-blue-600">Privacy</Link>
