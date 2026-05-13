@@ -516,7 +516,7 @@ export default function LandingPage() {
               to="/provider/auth"
               className="text-slate-700 hover:text-blue-600 font-medium"
             >
-              Provider Portal
+              Become a Provider 
             </Link>
           </div>
 
