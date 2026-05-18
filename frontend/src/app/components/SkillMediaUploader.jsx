@@ -14,26 +14,23 @@ function normalizeMime(type) {
 
 async function putToS3(putUrl, file) {
   const mime = normalizeMime(file.type);
+
   try {
     const res = await fetch(putUrl, {
       method: "PUT",
       headers: {
-        "Content-Type": mime || "application/octet-stream",
-        "Content-Length": String(file.size),
+        "Content-Type": mime
       },
       body: file,
-      duplex: "half",
-    
+      duplex: "half"
     });
-
-    //alert(`S3 response: ${res.status} ${res.statusText}`);
 
     if (!res.ok) {
       const text = await res.text().catch(() => "");
       throw new Error(`S3 upload failed (${res.status}): ${text}`);
     }
   } catch (err) {
-    //alert(`S3 PUT failed: ${err.name} - ${err.message}`);
+    alert(`S3 PUT failed: ${err.name} - ${err.message}`);
     throw err;
   }
 }
