@@ -5,12 +5,34 @@ const MAX_BYTES = 3 * 1024 * 1024; // 3MB (must match backend)
 const ALLOWED = new Set(["image/jpeg", "image/png", "image/webp"]);
 
 async function putToS3(putUrl, file) {
-  const res = await fetch(putUrl, {
-    method: "PUT",
-    headers: { "Content-Type": file.type },
-    body: file,
+  console.log("S3 upload debug:", {
+    fileName: file.name,
+    fileType: file.type,
+    fileSize: file.size,
+    putUrlHost: new URL(putUrl).host,
   });
-  if (!res.ok) throw new Error(`S3 upload failed (${res.status})`);
+
+  try {
+    alert(
+  `Origin: ${window.location.origin}\nType: ${file.type}\nSize: ${file.size}\nHost: ${new URL(putUrl).host}`
+);
+    const res = await fetch(putUrl, {
+      method: "PUT",
+      headers: { "Content-Type": file.type },
+      body: file,
+    });
+
+    console.log("S3 upload response:", {
+      status: res.status,
+      ok: res.ok,
+      statusText: res.statusText,
+    });
+
+    if (!res.ok) throw new Error(`S3 upload failed (${res.status})`);
+  } catch (err) {
+    console.error("S3 PUT fetch failed:", err);
+    throw err;
+  }
 }
 
 export default function SkillMediaUploader({ skillId, onUploaded, onError }) {
