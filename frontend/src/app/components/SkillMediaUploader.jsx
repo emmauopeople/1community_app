@@ -10,9 +10,10 @@ async function putToS3(putUrl, file) {
       method: "PUT",
       headers: {
         "Content-Type": file.type || "application/octet-stream",
+        "Content-Length": String(file.size),
       },
       body: file,
-      mode: "cors",
+    
     });
 
     alert(`S3 response: ${res.status} ${res.statusText}`);
