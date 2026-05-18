@@ -3,27 +3,37 @@ import { mediaApi } from "../api/media.api";
 
 const MAX_BYTES = 3 * 1024 * 1024; // 3MB (must match backend)
 const ALLOWED = new Set(["image/jpeg", "image/png", "image/webp"]);
+//normalize function to convert "image/jpg" to "image/jpeg"
+function normalizeMime(type) {
+  if (!type) return "image/jpeg";
+  if (type === "image/jpg") return "image/jpeg";
+  if (type.startsWith("image/jpeg")) return "image/jpeg";
+  return type;
+}
+
 
 async function putToS3(putUrl, file) {
+  const mime = normalizeMime(file.type);
   try {
     const res = await fetch(putUrl, {
       method: "PUT",
       headers: {
-        "Content-Type": file.type || "application/octet-stream",
+        "Content-Type": mime || "application/octet-stream",
         "Content-Length": String(file.size),
       },
       body: file,
+      duplex: "half",
     
     });
 
-    alert(`S3 response: ${res.status} ${res.statusText}`);
+    //alert(`S3 response: ${res.status} ${res.statusText}`);
 
     if (!res.ok) {
       const text = await res.text().catch(() => "");
       throw new Error(`S3 upload failed (${res.status}): ${text}`);
     }
   } catch (err) {
-    alert(`S3 PUT failed: ${err.name} - ${err.message}`);
+    //alert(`S3 PUT failed: ${err.name} - ${err.message}`);
     throw err;
   }
 }
@@ -73,7 +83,7 @@ export default function SkillMediaUploader({ skillId, onUploaded, onError }) {
 
       // 1) presign
       const presignPayload = selected.map(({ slot, file }) => ({
-        mimeType: file.type,
+        mimeType: normalizeMime(file.type),
         sizeBytes: file.size,
         sortOrder: slot,
       }));
@@ -92,7 +102,7 @@ export default function SkillMediaUploader({ skillId, onUploaded, onError }) {
         const f = filesBySlot[u.sortOrder];
         return {
           s3Key: u.s3Key,
-          mimeType: f.type,
+          mimeType: normalizeMime(f.type),
           sizeBytes: f.size,
           sortOrder: u.sortOrder,
         };
