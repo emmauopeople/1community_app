@@ -5,32 +5,25 @@ const MAX_BYTES = 3 * 1024 * 1024; // 3MB (must match backend)
 const ALLOWED = new Set(["image/jpeg", "image/png", "image/webp"]);
 
 async function putToS3(putUrl, file) {
-  console.log("S3 upload debug:", {
-    fileName: file.name,
-    fileType: file.type,
-    fileSize: file.size,
-    putUrlHost: new URL(putUrl).host,
-  });
-
   try {
-    alert(
-  `Origin: ${window.location.origin}\nType: ${file.type}\nSize: ${file.size}\nHost: ${new URL(putUrl).host}`
-);
     const res = await fetch(putUrl, {
       method: "PUT",
-      headers: { "Content-Type": file.type },
+      headers: {
+        "Content-Type": file.type || "application/octet-stream",
+        "Content-Length": String(file.size),
+      },
       body: file,
+    
     });
 
-    console.log("S3 upload response:", {
-      status: res.status,
-      ok: res.ok,
-      statusText: res.statusText,
-    });
+    alert(`S3 response: ${res.status} ${res.statusText}`);
 
-    if (!res.ok) throw new Error(`S3 upload failed (${res.status})`);
+    if (!res.ok) {
+      const text = await res.text().catch(() => "");
+      throw new Error(`S3 upload failed (${res.status}): ${text}`);
+    }
   } catch (err) {
-    console.error("S3 PUT fetch failed:", err);
+    alert(`S3 PUT failed: ${err.name} - ${err.message}`);
     throw err;
   }
 }
