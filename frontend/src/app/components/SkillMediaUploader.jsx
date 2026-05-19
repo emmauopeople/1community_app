@@ -15,24 +15,28 @@ function normalizeMime(type) {
 async function putToS3(putUrl, file) {
   const mime = normalizeMime(file.type);
 
-  try {
-    const res = await fetch(putUrl, {
-      method: "PUT",
-      headers: {
-        "Content-Type": mime
-      },
-      body: file,
-      duplex: "half"
-    });
+  console.log("S3 upload starting:", {
+    fileName: file.name,
+    fileType: file.type,
+    normalizedMime: mime,
+    fileSize: file.size,
+    s3Host: new URL(putUrl).host,
+  });
 
-    if (!res.ok) {
-      const text = await res.text().catch(() => "");
-      throw new Error(`S3 upload failed (${res.status}): ${text}`);
-    }
-  } catch (err) {
-    alert(`S3 PUT failed: ${err.name} - ${err.message}`);
-    throw err;
+  const res = await fetch(putUrl, {
+    method: "PUT",
+    headers: {
+      "Content-Type": mime,
+    },
+    body: file,
+  });
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(`S3 upload failed (${res.status}): ${text}`);
   }
+
+  console.log("S3 upload success:", res.status);
 }
 
 export default function SkillMediaUploader({ skillId, onUploaded, onError }) {
