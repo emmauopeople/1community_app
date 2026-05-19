@@ -75,32 +75,71 @@ export default function SkillMediaUploader({ skillId, onUploaded, onError }) {
   };
 
   const upload = async () => {
+  try {
+    setNotice({ type: "", text: "" });
+
+    if (!skillId) return showError("Create the skill first.");
+    if (selected.length === 0) return showError("Select at least one image.");
+
+    setBusy(true);
+
+    // STEP 1: Ask backend for presigned S3 URLs
+    let pres;
     try {
-      setNotice({ type: "", text: "" });
-      if (!skillId) return showError("Create the skill first.");
-      if (selected.length === 0) return showError("Select at least one image.");
-
-      setBusy(true);
-
-      // 1) presign
       const presignPayload = selected.map(({ slot, file }) => ({
         mimeType: normalizeMime(file.type),
         sizeBytes: file.size,
         sortOrder: slot,
       }));
 
-      const pres = await mediaApi.presignSkill(skillId, presignPayload);
+      console.log("MEDIA STEP 1: presign payload", presignPayload);
 
-      // 2) upload to S3
+      pres = await mediaApi.presignSkill(skillId, presignPayload);
+
+      console.log("MEDIA STEP 1 SUCCESS:", pres);
+    } catch (err) {
+      console.error("MEDIA STEP 1 PRESIGN FAILED:", err);
+      throw new Error(
+        `PRESIGN FAILED: ${
+          err?.response?.data?.error || err?.message || "Could not get upload URL"
+        }`
+      );
+    }
+
+    // STEP 2: Upload directly to S3
+    try {
       for (const u of pres.uploads) {
         const f = filesBySlot[u.sortOrder];
         if (!f) continue;
-        await putToS3(u.putUrl, f);
-      }
 
-      // 3) confirm metadata
+        console.log("MEDIA STEP 2: S3 upload starting", {
+          sortOrder: u.sortOrder,
+          fileName: f.name,
+          fileType: f.type,
+          normalizedMime: normalizeMime(f.type),
+          fileSize: f.size,
+          s3Host: new URL(u.putUrl).host,
+        });
+
+        await putToS3(u.putUrl, f);
+
+        console.log("MEDIA STEP 2 SUCCESS:", u.sortOrder);
+      }
+    } catch (err) {
+      console.error("MEDIA STEP 2 S3 PUT FAILED:", err);
+      throw new Error(
+        `S3 PUT FAILED: ${err?.name || "Error"} - ${
+          err?.message || "Failed to upload directly to S3"
+        }`
+      );
+    }
+
+    // STEP 3: Confirm uploaded media with backend
+    let done;
+    try {
       const confirmItems = pres.uploads.map((u) => {
         const f = filesBySlot[u.sortOrder];
+
         return {
           s3Key: u.s3Key,
           mimeType: normalizeMime(f.type),
@@ -109,18 +148,30 @@ export default function SkillMediaUploader({ skillId, onUploaded, onError }) {
         };
       });
 
-      const done = await mediaApi.confirmSkill(skillId, confirmItems);
+      console.log("MEDIA STEP 3: confirm payload", confirmItems);
 
-      showSuccess("✅ Images uploaded.");
-      setFilesBySlot({ 0: null, 1: null, 2: null });
+      done = await mediaApi.confirmSkill(skillId, confirmItems);
 
-      onUploaded?.(done.media || []);
-    } catch (e) {
-      showError(e?.response?.data?.error || e?.message || "Upload failed.");
-    } finally {
-      setBusy(false);
+      console.log("MEDIA STEP 3 SUCCESS:", done);
+    } catch (err) {
+      console.error("MEDIA STEP 3 CONFIRM FAILED:", err);
+      throw new Error(
+        `CONFIRM FAILED: ${
+          err?.response?.data?.error || err?.message || "Could not save media metadata"
+        }`
+      );
     }
-  };
+
+    showSuccess("✅ Images uploaded.");
+    setFilesBySlot({ 0: null, 1: null, 2: null });
+
+    onUploaded?.(done.media || []);
+  } catch (e) {
+    showError(e?.message || "Upload failed.");
+  } finally {
+    setBusy(false);
+  }
+};
 
   const noticeClass =
     notice.type === "success"
