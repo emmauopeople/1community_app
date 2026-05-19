@@ -12,8 +12,10 @@ const s3 = new S3Client({ region });
 export async function presignPut({ bucket, key, contentType, expiresIn }) {
   const cmd = new PutObjectCommand({
     Bucket: bucket,
-    Key: key
+    Key: key,
+    ContentType: contentType,
   });
+
   return getSignedUrl(s3, cmd, { expiresIn });
 }
 
