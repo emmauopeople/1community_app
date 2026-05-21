@@ -412,12 +412,23 @@ router.post(
         });
       }
 
-      await logEvent({
-        req,
-        eventType: "media_upload_direct",
-        userId: providerId,
-        meta: { skillId, count: uploadedItems.length },
-      });
+      try {
+        await logEvent({
+          req,
+          eventType: "media_confirm",
+          userId: providerId,
+          meta: {
+            skillId,
+            count: uploadedItems.length,
+            uploadMode: "backend_direct",
+          },
+        });
+      } catch (logErr) {
+        console.error(
+          "MEDIA DIRECT UPLOAD LOG EVENT ERROR:",
+          logErr?.message || logErr,
+        );
+      }
 
       return res.json({ ok: true, media });
     } catch (e) {

@@ -24,7 +24,7 @@ app.use("/metrics", metricsRoutes);
 const allowedOrigins = [
   "https://www.cameroonskills.org",
   "https://cameroonskills.org",
-  "http://localhost:5173"
+  "http://localhost:5173",
 ];
 
 app.use(
@@ -38,7 +38,7 @@ app.use(
       }
     },
     credentials: true,
-  })
+  }),
 );
 
 app.use(express.json());
@@ -52,7 +52,7 @@ app.use(
     max: 100,
     standardHeaders: true,
     legacyHeaders: false,
-  })
+  }),
 );
 
 app.use(healthRoutes);
@@ -70,7 +70,7 @@ app.get("/api/hello", (req, res) =>
     message: "Hello from 1community backend up 👋",
     env: process.env.NODE_ENV || "dev",
     time: new Date().toISOString(),
-  })
+  }),
 );
 
 export default app;
