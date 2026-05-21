@@ -24,5 +24,27 @@ export async function presignGet({ bucket, key, expiresIn }) {
     Bucket: bucket,
     Key: key,
   });
+
   return getSignedUrl(s3, cmd, { expiresIn });
+}
+
+export async function uploadBufferToS3({
+  bucket,
+  key,
+  buffer,
+  contentType,
+}) {
+  const cmd = new PutObjectCommand({
+    Bucket: bucket,
+    Key: key,
+    Body: buffer,
+    ContentType: contentType,
+  });
+
+  await s3.send(cmd);
+
+  return {
+    bucket,
+    key,
+  };
 }
