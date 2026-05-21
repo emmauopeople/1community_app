@@ -1,46 +1,44 @@
 import React, { useMemo, useState } from "react";
 import { mediaApi } from "../api/media.api";
 
-const MAX_BYTES = 3 * 1024 * 1024; // 3MB (must match backend)
+const MAX_BYTES = 3 * 1024 * 1024; // 3MB, must match backend
 const ALLOWED = new Set(["image/jpeg", "image/png", "image/webp"]);
-//normalize function to convert "image/jpg" to "image/jpeg"
-function normalizeMime(type) {
-  if (!type) return "image/jpeg";
-  if (type === "image/jpg") return "image/jpeg";
-  if (type.startsWith("image/jpeg")) return "image/jpeg";
-  return type;
-}
 
+function normalizeMime(type, name = "") {
+  const cleanType = String(type || "")
+    .toLowerCase()
+    .split(";")[0]
+    .trim();
 
-async function putToS3(putUrl, file) {
-  const mime = normalizeMime(file.type);
+  if (cleanType === "image/jpg") return "image/jpeg";
+  if (cleanType === "image/jpeg") return "image/jpeg";
+  if (cleanType === "image/png") return "image/png";
+  if (cleanType === "image/webp") return "image/webp";
 
-  console.log("S3 upload starting:", {
-    fileName: file.name,
-    fileType: file.type,
-    normalizedMime: mime,
-    fileSize: file.size,
-    s3Host: new URL(putUrl).host,
-  });
+  const fileName = String(name || "").toLowerCase();
 
-  const res = await fetch(putUrl, {
-    method: "PUT",
-    headers: {
-      "Content-Type": mime,
-    },
-    body: file,
-  });
-
-  if (!res.ok) {
-    const text = await res.text().catch(() => "");
-    throw new Error(`S3 upload failed (${res.status}): ${text}`);
+  if (fileName.endsWith(".jpg") || fileName.endsWith(".jpeg")) {
+    return "image/jpeg";
   }
 
-  console.log("S3 upload success:", res.status);
+  if (fileName.endsWith(".png")) {
+    return "image/png";
+  }
+
+  if (fileName.endsWith(".webp")) {
+    return "image/webp";
+  }
+
+  return cleanType;
 }
 
 export default function SkillMediaUploader({ skillId, onUploaded, onError }) {
-  const [filesBySlot, setFilesBySlot] = useState({ 0: null, 1: null, 2: null });
+  const [filesBySlot, setFilesBySlot] = useState({
+    0: null,
+    1: null,
+    2: null,
+  });
+
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState({ type: "", text: "" });
 
@@ -48,14 +46,21 @@ export default function SkillMediaUploader({ skillId, onUploaded, onError }) {
     setNotice({ type: "error", text });
     onError?.(text);
   };
-  const showSuccess = (text) => setNotice({ type: "success", text });
+
+  const showSuccess = (text) => {
+    setNotice({ type: "success", text });
+  };
 
   const selected = useMemo(() => {
     return [0, 1, 2]
       .map((slot) => {
-        const f = filesBySlot[slot];
-        if (!f) return null;
-        return { slot, file: f };
+        const file = filesBySlot[slot];
+        if (!file) return null;
+
+        return {
+          slot,
+          file,
+        };
       })
       .filter(Boolean);
   }, [filesBySlot]);
@@ -63,122 +68,82 @@ export default function SkillMediaUploader({ skillId, onUploaded, onError }) {
   const setSlot = (slot, file) => {
     setNotice({ type: "", text: "" });
 
-    if (!file) return setFilesBySlot((p) => ({ ...p, [slot]: null }));
-
-    if (!ALLOWED.has(file.type)) {
-      return showError("Only JPG, PNG, or WEBP allowed.");
+    if (!file) {
+      return setFilesBySlot((previous) => ({
+        ...previous,
+        [slot]: null,
+      }));
     }
+
+    const mime = normalizeMime(file.type, file.name);
+
+    if (!ALLOWED.has(mime)) {
+      return showError("Only JPG, PNG, or WEBP images are allowed.");
+    }
+
     if (file.size > MAX_BYTES) {
       return showError("Image too large. Max 3MB.");
     }
-    setFilesBySlot((p) => ({ ...p, [slot]: file }));
+
+    setFilesBySlot((previous) => ({
+      ...previous,
+      [slot]: file,
+    }));
   };
 
   const upload = async () => {
-  try {
-    setNotice({ type: "", text: "" });
-
-    if (!skillId) return showError("Create the skill first.");
-    if (selected.length === 0) return showError("Select at least one image.");
-
-    setBusy(true);
-
-    // STEP 1: Ask backend for presigned S3 URLs
-    let pres;
     try {
-      const presignPayload = selected.map(({ slot, file }) => ({
-        mimeType: normalizeMime(file.type),
-        sizeBytes: file.size,
-        sortOrder: slot,
-      }));
+      setNotice({ type: "", text: "" });
 
-      console.log("MEDIA STEP 1: presign payload", presignPayload);
-
-      pres = await mediaApi.presignSkill(skillId, presignPayload);
-
-      console.log("MEDIA STEP 1 SUCCESS:", pres);
-    } catch (err) {
-      console.error("MEDIA STEP 1 PRESIGN FAILED:", err);
-      throw new Error(
-        `PRESIGN FAILED: ${
-          err?.response?.data?.error || err?.message || "Could not get upload URL"
-        }`
-      );
-    }
-
-    // STEP 2: Upload directly to S3
-    try {
-      for (const u of pres.uploads) {
-        const f = filesBySlot[u.sortOrder];
-        if (!f) continue;
-
-        console.log("MEDIA STEP 2: S3 upload starting", {
-          sortOrder: u.sortOrder,
-          fileName: f.name,
-          fileType: f.type,
-          normalizedMime: normalizeMime(f.type),
-          fileSize: f.size,
-          s3Host: new URL(u.putUrl).host,
-        });
-
-        await putToS3(u.putUrl, f);
-
-        console.log("MEDIA STEP 2 SUCCESS:", u.sortOrder);
+      if (!skillId) {
+        return showError("Create the skill first.");
       }
-    } catch (err) {
-      console.error("MEDIA STEP 2 S3 PUT FAILED:", err);
-      throw new Error(
-        `S3 PUT FAILED: ${err?.name || "Error"} - ${
-          err?.message || "Failed to upload directly to S3"
-        }`
-      );
-    }
 
-    // STEP 3: Confirm uploaded media with backend
-    let done;
-    try {
-      const confirmItems = pres.uploads.map((u) => {
-        const f = filesBySlot[u.sortOrder];
+      if (selected.length === 0) {
+        return showError("Select at least one image.");
+      }
 
-        return {
-          s3Key: u.s3Key,
-          mimeType: normalizeMime(f.type),
-          sizeBytes: f.size,
-          sortOrder: u.sortOrder,
-        };
+      setBusy(true);
+
+      console.log("MEDIA DIRECT UPLOAD STARTING:", {
+        skillId,
+        selectedCount: selected.length,
+        files: selected.map(({ slot, file }) => ({
+          slot,
+          name: file.name,
+          type: file.type,
+          normalizedMime: normalizeMime(file.type, file.name),
+          size: file.size,
+        })),
       });
 
-      console.log("MEDIA STEP 3: confirm payload", confirmItems);
+      const done = await mediaApi.uploadSkillDirect(skillId, filesBySlot);
 
-      done = await mediaApi.confirmSkill(skillId, confirmItems);
+      console.log("MEDIA DIRECT UPLOAD SUCCESS:", done);
 
-      console.log("MEDIA STEP 3 SUCCESS:", done);
-    } catch (err) {
-      console.error("MEDIA STEP 3 CONFIRM FAILED:", err);
-      throw new Error(
-        `CONFIRM FAILED: ${
-          err?.response?.data?.error || err?.message || "Could not save media metadata"
-        }`
+      showSuccess("✅ Images uploaded.");
+      setFilesBySlot({ 0: null, 1: null, 2: null });
+
+      onUploaded?.(done.media || []);
+    } catch (error) {
+      console.error("MEDIA DIRECT UPLOAD FAILED:", error);
+
+      showError(
+        error?.response?.data?.error ||
+          error?.message ||
+          "Upload failed. Please try again.",
       );
+    } finally {
+      setBusy(false);
     }
-
-    showSuccess("✅ Images uploaded.");
-    setFilesBySlot({ 0: null, 1: null, 2: null });
-
-    onUploaded?.(done.media || []);
-  } catch (e) {
-    showError(e?.message || "Upload failed.");
-  } finally {
-    setBusy(false);
-  }
-};
+  };
 
   const noticeClass =
     notice.type === "success"
       ? "border-emerald-200 bg-emerald-50 text-emerald-700"
       : notice.type === "error"
-      ? "border-orange-200 bg-orange-50 text-orange-700"
-      : "";
+        ? "border-orange-200 bg-orange-50 text-orange-700"
+        : "";
 
   return (
     <div className="mt-4 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
@@ -186,43 +151,46 @@ export default function SkillMediaUploader({ skillId, onUploaded, onError }) {
 
       <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
         {[0, 1, 2].map((slot) => {
-          const f = filesBySlot[slot];
+          const file = filesBySlot[slot];
           const inputId = `skill-img-slot-${slot}`;
 
           return (
-            <div key={slot} className="rounded-xl border border-slate-100 p-3 bg-slate-50">
-              <div className="text-xs text-slate-600 mb-2">Slot {slot + 1}</div>
+            <div
+              key={slot}
+              className="rounded-xl border border-slate-100 bg-slate-50 p-3"
+            >
+              <div className="mb-2 text-xs text-slate-600">
+                Slot {slot + 1}
+              </div>
 
-              {/* Hidden file input */}
               <input
                 id={inputId}
                 type="file"
                 accept="image/jpeg,image/png,image/webp"
                 disabled={busy}
-                onChange={(e) => setSlot(slot, e.target.files?.[0] || null)}
+                onChange={(event) => setSlot(slot, event.target.files?.[0] || null)}
                 className="hidden"
               />
 
-              {/* Button-like label */}
               <label
                 htmlFor={inputId}
-                className={`h-11 w-full rounded-xl border border-slate-200 bg-slate-100 text-slate-900 font-medium text-sm
-                  inline-flex items-center justify-center cursor-pointer hover:bg-slate-200 active:scale-[0.99] transition
-                  ${busy ? "opacity-60 cursor-not-allowed" : ""}`}
+                className={`inline-flex h-11 w-full cursor-pointer items-center justify-center rounded-xl border border-slate-200 bg-slate-100 text-sm font-medium text-slate-900 transition hover:bg-slate-200 active:scale-[0.99] ${
+                  busy ? "cursor-not-allowed opacity-60" : ""
+                }`}
               >
                 Choose file
               </label>
 
-              <div className="mt-2 text-xs text-slate-600 truncate">
-                {f ? f.name : "No file chosen"}
+              <div className="mt-2 truncate text-xs text-slate-600">
+                {file ? file.name : "No file chosen"}
               </div>
 
-              {f ? (
+              {file ? (
                 <button
                   type="button"
                   disabled={busy}
                   onClick={() => setSlot(slot, null)}
-                  className="mt-2 text-xs text-blue-700 hover:underline"
+                  className="mt-2 text-xs text-blue-700 hover:underline disabled:opacity-60"
                 >
                   Remove
                 </button>
@@ -242,13 +210,13 @@ export default function SkillMediaUploader({ skillId, onUploaded, onError }) {
         type="button"
         disabled={busy}
         onClick={upload}
-        className="mt-4 h-11 w-full rounded-xl bg-gradient-to-r from-blue-600 to-emerald-500 text-white font-semibold shadow-sm hover:opacity-95 active:scale-[0.99] transition disabled:opacity-60"
+        className="mt-4 h-11 w-full rounded-xl bg-gradient-to-r from-blue-600 to-emerald-500 font-semibold text-white shadow-sm transition hover:opacity-95 active:scale-[0.99] disabled:opacity-60"
       >
         {busy ? "Uploading..." : "Upload selected images"}
       </button>
 
       <div className="mt-2 text-xs text-slate-500">
-        Private S3 + presigned PUT/GET (NIST CSF Protect).
+        Images upload through the secure backend API, then are stored in private S3.
       </div>
     </div>
   );
