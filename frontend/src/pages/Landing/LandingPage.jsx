@@ -504,27 +504,55 @@ export default function LandingPage() {
       </main>
 
       {/* Footer (full width, fixed bottom of page flow like ProviderAuth) */}
-      <footer className="w-full bg-white border-t border-slate-200">
-        <div className="w-full px-4 sm:px-6 lg:px-10 py-4">
-          <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm">
-            <Link to="/about" className="text-slate-700 hover:text-blue-600">About one community</Link>
-            <Link id="footer-contact" to="/contact" className="text-slate-700 hover:text-blue-600">Contact</Link>
-            <Link id="footer-terms" to="/terms" className="text-slate-700 hover:text-blue-600">Terms</Link>
-            <Link id="footer-privacy" to="/privacy" className="text-slate-700 hover:text-blue-600">Privacy</Link>
-            <Link
-              id="footer-provider-auth"
-              to="/provider/auth"
-              className="text-slate-700 hover:text-blue-600 font-medium"
-            >
-              Become a Provider 
-            </Link>
-          </div>
+ <footer className="w-full border-t border-slate-200 bg-white">
+  <div className="w-full px-4 py-4 sm:px-6 lg:px-10">
+    <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
+      <Link
+        id="footer-about"
+        to="/about"
+        className="text-slate-700 hover:text-blue-600"
+      >
+        About One Community
+      </Link>
 
-          <div className="mt-3 text-xs text-slate-500">
-            © {new Date().getFullYear()} One Community.
-          </div>
-        </div>
-      </footer>
+      <Link
+        id="footer-contact"
+        to="/contact"
+        className="text-slate-700 hover:text-blue-600"
+      >
+        Contact One Community
+      </Link>
+
+      <Link
+        id="footer-terms"
+        to="/terms"
+        className="text-slate-700 hover:text-blue-600"
+      >
+        Terms
+      </Link>
+
+      <Link
+        id="footer-privacy"
+        to="/privacy"
+        className="text-slate-700 hover:text-blue-600"
+      >
+        Privacy
+      </Link>
+
+      <Link
+        id="footer-provider-auth"
+        to="/provider/auth"
+        className="font-medium text-blue-600 hover:text-blue-700"
+      >
+        Become a Provider
+      </Link>
     </div>
-  );
+
+    <div className="mt-3 text-xs text-slate-500">
+      © {new Date().getFullYear()} One Community. All rights reserved.
+    </div>
+  </div>
+</footer>
+      </div>
+    );
 }
