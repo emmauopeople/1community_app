@@ -14,6 +14,7 @@ import mediaRoutes from "./routes/media.js";
 import contactRoutes from "./routes/contact.js";
 import profileRoutes from "./routes/profile.js";
 import metricsRoutes from "./routes/metrics.js";
+import supportRoutes from "./routes/support.js";
 
 const app = express();
 
@@ -63,6 +64,7 @@ app.use("/events", eventsRoutes);
 app.use(analyticsRoutes);
 app.use(mediaRoutes);
 app.use(contactRoutes);
+app.use(supportRoutes);
 app.use(profileRoutes);
 
 app.get("/api/hello", (req, res) =>
