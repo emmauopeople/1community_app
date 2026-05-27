@@ -318,6 +318,12 @@ export default function ProviderSkills() {
               Real Estate
             </button>
             <Link
+  to="/provider/requests"
+  className="text-xs px-3 py-2 rounded-full bg-white border border-slate-200 text-slate-700 hover:bg-slate-50"
+>
+  Requests
+</Link>
+            <Link
               to="/provider/profile"
               className="text-xs px-3 py-2 rounded-full bg-white border border-slate-200 text-slate-700 hover:bg-slate-50"
             >
@@ -385,6 +391,13 @@ export default function ProviderSkills() {
             >
               Real Estate (soon)
             </button>
+            <Link
+  to="/provider/requests"
+  onClick={() => setMobileMenuOpen(false)}
+  className="block w-full h-11 rounded-xl border border-slate-200 bg-white text-slate-700 font-medium text-sm text-left px-3 leading-[44px]"
+>
+  Requests
+</Link>
             <Link
               to="/provider/profile"
               onClick={() => setMobileMenuOpen(false)}

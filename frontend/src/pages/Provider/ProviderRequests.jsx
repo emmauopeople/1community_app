@@ -195,16 +195,16 @@ export default function ProviderRequests() {
 
           <div className="flex items-center gap-2">
             <Link
-              to="/provider/portal"
+              to="/provider/skills"
               className="h-10 px-4 inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-blue-600 to-emerald-500 text-white font-semibold shadow-sm hover:opacity-95 active:scale-[0.99] transition text-sm"
             >
-              Portal
+              My Skills
             </Link>
 
             <button
               type="button"
               onClick={onLogout}
-              className="h-10 px-4 rounded-xl border border-slate-200 bg-white text-slate-900 font-semibold hover:bg-slate-50 active:scale-[0.99] transition text-sm"
+              className="h-10 px-4 inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-blue-600 to-emerald-500 text-white font-semibold shadow-sm hover:opacity-95 active:scale-[0.99] transition text-sm"
             >
               Logout
             </button>
