@@ -13,6 +13,7 @@ import ProviderProfile from "./pages/Provider/ProviderProfile.jsx";
 // keep this import if your file is here
 import ProviderSkills from "./app/pages/provider/ProviderSkills.jsx";
 import ContactPage from "./pages/Contact/ContactPage.jsx";
+import ProviderRequests from "./pages/Provider/ProviderRequests.jsx";
 
 export default function App() {
   return (
@@ -48,6 +49,14 @@ export default function App() {
             </ProviderGuard>
           }
         />
+        <Route
+  path="/provider/requests"
+  element={
+    <ProviderGuard>
+      <ProviderRequests />
+    </ProviderGuard>
+  }
+/>
 
         <Route path="/search" element={<SearchPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
