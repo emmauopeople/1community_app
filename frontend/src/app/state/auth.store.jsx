@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { authApi } from "../api/auth.api";
 
 const AuthCtx = createContext(null);
@@ -30,7 +36,7 @@ export function AuthProvider({ children }) {
       loading,
       refresh,
     }),
-    [user, loading]
+    [user, loading],
   );
 
   return <AuthCtx.Provider value={value}>{children}</AuthCtx.Provider>;

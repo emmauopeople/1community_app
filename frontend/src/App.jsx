@@ -50,13 +50,13 @@ export default function App() {
           }
         />
         <Route
-  path="/provider/requests"
-  element={
-    <ProviderGuard>
-      <ProviderRequests />
-    </ProviderGuard>
-  }
-/>
+          path="/provider/requests"
+          element={
+            <ProviderGuard>
+              <ProviderRequests />
+            </ProviderGuard>
+          }
+        />
 
         <Route path="/search" element={<SearchPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />

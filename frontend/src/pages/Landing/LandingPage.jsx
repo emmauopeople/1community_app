@@ -19,7 +19,9 @@ export default function LandingPage() {
   const handleSearch = () => {
     const q = encodeURIComponent(keyword.trim());
     const loc = encodeURIComponent(
-      (location.trim() || "Near me").toLowerCase() === "near me" ? "near" : location.trim()
+      (location.trim() || "Near me").toLowerCase() === "near me"
+        ? "near"
+        : location.trim(),
     );
     navigate(`/search?q=${q}&loc=${loc}`);
   };
@@ -109,8 +111,12 @@ export default function LandingPage() {
       const data = await res.json();
 
       const daily = data?.daily || {};
-      const tMax = Array.isArray(daily?.temperature_2m_max) ? daily.temperature_2m_max : [];
-      const tMin = Array.isArray(daily?.temperature_2m_min) ? daily.temperature_2m_min : [];
+      const tMax = Array.isArray(daily?.temperature_2m_max)
+        ? daily.temperature_2m_max
+        : [];
+      const tMin = Array.isArray(daily?.temperature_2m_min)
+        ? daily.temperature_2m_min
+        : [];
       const wCode = Array.isArray(daily?.weathercode) ? daily.weathercode : [];
       const times = Array.isArray(daily?.time) ? daily.time : [];
 
@@ -122,8 +128,10 @@ export default function LandingPage() {
 
       const todayParts = [];
       if (curTempF !== null) todayParts.push(`Now: ${curTempF}°F`);
-      if (curCode !== undefined && curCode !== null) todayParts.push(weatherCodeToText(curCode));
-      if (todayHighF !== null && todayLowF !== null) todayParts.push(`Today: H ${todayHighF}° / L ${todayLowF}°`);
+      if (curCode !== undefined && curCode !== null)
+        todayParts.push(weatherCodeToText(curCode));
+      if (todayHighF !== null && todayLowF !== null)
+        todayParts.push(`Today: H ${todayHighF}° / L ${todayLowF}°`);
 
       const nextDays = [1, 2, 3]
         .map((i) => {
@@ -132,9 +140,17 @@ export default function LandingPage() {
           const lo = cToF(tMin[i]);
           const code = wCode[i];
           const label = dateStr
-            ? new Date(dateStr + "T00:00:00").toLocaleDateString(undefined, { weekday: "short" })
+            ? new Date(dateStr + "T00:00:00").toLocaleDateString(undefined, {
+                weekday: "short",
+              })
             : `Day ${i}`;
-          return { key: `${i}-${dateStr || "x"}`, label, hi, lo, desc: weatherCodeToText(code) };
+          return {
+            key: `${i}-${dateStr || "x"}`,
+            label,
+            hi,
+            lo,
+            desc: weatherCodeToText(code),
+          };
         })
         .filter((d) => d.hi !== null || d.lo !== null);
 
@@ -167,7 +183,7 @@ export default function LandingPage() {
       navigator.geolocation.getCurrentPosition(
         (pos) => resolve(pos),
         (err) => reject(err),
-        { enableHighAccuracy: false, timeout: 8000, maximumAge: 2 * 60 * 1000 }
+        { enableHighAccuracy: false, timeout: 8000, maximumAge: 2 * 60 * 1000 },
       );
     });
 
@@ -184,7 +200,8 @@ export default function LandingPage() {
       const pos = await getGeoCoords();
       const lat = pos?.coords?.latitude;
       const lon = pos?.coords?.longitude;
-      if (typeof lat !== "number" || typeof lon !== "number") throw new Error("Invalid coordinates");
+      if (typeof lat !== "number" || typeof lon !== "number")
+        throw new Error("Invalid coordinates");
 
       lastRequestRef.current = { type: "coords", lat, lon, place: "Near you" };
       await fetchForecastByCoords({ lat, lon, placeLabel: "Near you" });
@@ -206,7 +223,7 @@ export default function LandingPage() {
     abortRef.current = controller;
 
     const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(
-      cityName
+      cityName,
     )}&count=1&language=en&format=json`;
 
     const res = await fetch(url, { signal: controller.signal });
@@ -214,10 +231,18 @@ export default function LandingPage() {
     const data = await res.json();
     const first = Array.isArray(data?.results) ? data.results[0] : null;
 
-    if (!first || typeof first.latitude !== "number" || typeof first.longitude !== "number") {
+    if (
+      !first ||
+      typeof first.latitude !== "number" ||
+      typeof first.longitude !== "number"
+    ) {
       throw new Error("City not found");
     }
-    return { lat: first.latitude, lon: first.longitude, place: first.name || cityName };
+    return {
+      lat: first.latitude,
+      lon: first.longitude,
+      place: first.name || cityName,
+    };
   };
 
   const handleCitySubmit = async () => {
@@ -234,8 +259,18 @@ export default function LandingPage() {
 
     try {
       const geo = await geocodeCity(city);
-      lastRequestRef.current = { type: "city", city: geo.place, lat: geo.lat, lon: geo.lon, place: geo.place };
-      await fetchForecastByCoords({ lat: geo.lat, lon: geo.lon, placeLabel: geo.place });
+      lastRequestRef.current = {
+        type: "city",
+        city: geo.place,
+        lat: geo.lat,
+        lon: geo.lon,
+        place: geo.place,
+      };
+      await fetchForecastByCoords({
+        lat: geo.lat,
+        lon: geo.lon,
+        placeLabel: geo.place,
+      });
     } catch (err) {
       if (err?.name === "AbortError") return;
       setWeatherState((prev) => ({
@@ -251,8 +286,18 @@ export default function LandingPage() {
   const handleWeatherRetry = async () => {
     const last = lastRequestRef.current;
     if (!last) return loadWeatherFromGeolocation();
-    if (last.type === "coords") return fetchForecastByCoords({ lat: last.lat, lon: last.lon, placeLabel: last.place || "Near you" });
-    if (last.type === "city") return fetchForecastByCoords({ lat: last.lat, lon: last.lon, placeLabel: last.place || last.city || "City" });
+    if (last.type === "coords")
+      return fetchForecastByCoords({
+        lat: last.lat,
+        lon: last.lon,
+        placeLabel: last.place || "Near you",
+      });
+    if (last.type === "city")
+      return fetchForecastByCoords({
+        lat: last.lat,
+        lon: last.lon,
+        placeLabel: last.place || last.city || "City",
+      });
     return loadWeatherFromGeolocation();
   };
 
@@ -278,15 +323,24 @@ export default function LandingPage() {
     { label: "Trucker", slug: "trucker" },
   ];
 
-  const goCategory = (slug) => navigate(`/search?category=${encodeURIComponent(slug)}&loc=near`);
+  const goCategory = (slug) =>
+    navigate(`/search?category=${encodeURIComponent(slug)}&loc=near`);
 
   return (
     <div className="min-h-screen w-full bg-slate-50 flex flex-col text-slate-900">
       {/* Header (full width, flush) */}
       <header className="w-full sticky top-0 z-10 bg-gray-100 border-b border-gray-200">
         <div className="w-full px-4 sm:px-6 lg:px-10 h-14 flex items-center justify-between">
-          <Link to="/" id="nav-logo" className="flex items-center gap-2 text-gray-900 font-semibold">
-            <img src={appLogo} alt="One Community logo" className="h-8 w-8 object-contain" />
+          <Link
+            to="/"
+            id="nav-logo"
+            className="flex items-center gap-2 text-gray-900 font-semibold"
+          >
+            <img
+              src={appLogo}
+              alt="One Community logo"
+              className="h-8 w-8 object-contain"
+            />
             <span className="text-base sm:text-lg">One Community</span>
           </Link>
 
@@ -304,7 +358,9 @@ export default function LandingPage() {
       <main className="flex-1 mx-auto w-full max-w-5xl px-4 py-5 space-y-4">
         {/* Hero Search (Card) */}
         <section className="bg-white rounded-2xl shadow-sm border border-slate-100 p-4">
-          <h1 className="text-xl font-semibold leading-tight">Find trusted local skill providers near you</h1>
+          <h1 className="text-xl font-semibold leading-tight">
+            Find trusted local skill providers near you
+          </h1>
 
           <div className="mt-4 space-y-3">
             <input
@@ -345,7 +401,9 @@ export default function LandingPage() {
               Search
             </button>
 
-            <p className="text-xs text-slate-600">Enable location for nearby results.</p>
+            <p className="text-xs text-slate-600">
+              Enable location for nearby results.
+            </p>
           </div>
         </section>
 
@@ -356,7 +414,9 @@ export default function LandingPage() {
             <div className="flex items-start justify-between gap-3">
               <div>
                 <div className="text-sm font-semibold">Weather near you</div>
-                <div className="text-xs text-slate-600 mt-0.5">Quick today + next 3 days.</div>
+                <div className="text-xs text-slate-600 mt-0.5">
+                  Quick today + next 3 days.
+                </div>
               </div>
 
               <button
@@ -370,7 +430,10 @@ export default function LandingPage() {
             </div>
 
             {/* Loading */}
-            <div id="weather-loading" className={weatherState.loading ? "mt-4" : "hidden"}>
+            <div
+              id="weather-loading"
+              className={weatherState.loading ? "mt-4" : "hidden"}
+            >
               <div className="text-sm text-slate-700">Loading weather…</div>
               <div className="mt-2 h-2 w-full bg-slate-100 rounded-full overflow-hidden">
                 <div className="h-full w-1/3 bg-gradient-to-r from-blue-600 to-emerald-500 animate-pulse" />
@@ -378,7 +441,10 @@ export default function LandingPage() {
             </div>
 
             {/* Error */}
-            <div id="weather-error" className={weatherState.error ? "mt-4" : "hidden"}>
+            <div
+              id="weather-error"
+              className={weatherState.error ? "mt-4" : "hidden"}
+            >
               <div className="text-sm text-rose-600">{weatherState.error}</div>
               <button
                 id="weather-retry"
@@ -394,10 +460,17 @@ export default function LandingPage() {
             <div
               id="weather-denied"
               className={
-                weatherState.denied && !weatherState.loading && !weatherState.success && !weatherState.error ? "mt-4" : "hidden"
+                weatherState.denied &&
+                !weatherState.loading &&
+                !weatherState.success &&
+                !weatherState.error
+                  ? "mt-4"
+                  : "hidden"
               }
             >
-              <div className="text-xs text-slate-600">Location denied/unavailable. Enter a city to get weather.</div>
+              <div className="text-xs text-slate-600">
+                Location denied/unavailable. Enter a city to get weather.
+              </div>
 
               <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
                 <input
@@ -420,8 +493,14 @@ export default function LandingPage() {
             </div>
 
             {/* Success */}
-            <div id="weather-success" className={weatherState.success ? "mt-4" : "hidden"}>
-              <div id="weather-place" className="text-sm font-semibold text-slate-900">
+            <div
+              id="weather-success"
+              className={weatherState.success ? "mt-4" : "hidden"}
+            >
+              <div
+                id="weather-place"
+                className="text-sm font-semibold text-slate-900"
+              >
                 {weatherState.place || "Near you"}
               </div>
 
@@ -430,15 +509,20 @@ export default function LandingPage() {
               </div>
 
               <div id="weather-next" className="mt-4">
-                <div className="text-xs font-semibold text-slate-700 mb-2">Next 3 days</div>
+                <div className="text-xs font-semibold text-slate-700 mb-2">
+                  Next 3 days
+                </div>
                 <div className="grid grid-cols-1 gap-2">
-                  {Array.isArray(weatherState.nextDays) && weatherState.nextDays.length > 0 ? (
+                  {Array.isArray(weatherState.nextDays) &&
+                  weatherState.nextDays.length > 0 ? (
                     weatherState.nextDays.map((d) => (
                       <div
                         key={d.key}
                         className="flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50 px-3 py-2"
                       >
-                        <div className="text-sm font-medium text-slate-900">{d.label}</div>
+                        <div className="text-sm font-medium text-slate-900">
+                          {d.label}
+                        </div>
                         <div className="text-xs text-slate-600 text-right">
                           <div>{d.desc}</div>
                           <div className="font-semibold text-slate-800">
@@ -448,16 +532,23 @@ export default function LandingPage() {
                       </div>
                     ))
                   ) : (
-                    <div className="text-sm text-slate-600">No forecast available.</div>
+                    <div className="text-sm text-slate-600">
+                      No forecast available.
+                    </div>
                   )}
                 </div>
               </div>
             </div>
 
             {/* If denied but error exists, keep city input visible */}
-            {weatherState.denied && !weatherState.loading && !weatherState.success && weatherState.error ? (
+            {weatherState.denied &&
+            !weatherState.loading &&
+            !weatherState.success &&
+            weatherState.error ? (
               <div className="mt-4">
-                <div className="text-xs text-slate-600">Try entering a city instead:</div>
+                <div className="text-xs text-slate-600">
+                  Try entering a city instead:
+                </div>
                 <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
                   <input
                     id="weather-city-input"
@@ -498,61 +589,63 @@ export default function LandingPage() {
               ))}
             </div>
 
-            <div className="mt-3 text-xs text-slate-600">Tip: categories open a quick search near you.</div>
+            <div className="mt-3 text-xs text-slate-600">
+              Tip: categories open a quick search near you.
+            </div>
           </div>
         </section>
       </main>
 
       {/* Footer (full width, fixed bottom of page flow like ProviderAuth) */}
- <footer className="w-full border-t border-slate-200 bg-white">
-  <div className="w-full px-4 py-4 sm:px-6 lg:px-10">
-    <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
-      <Link
-        id="footer-about"
-        to="/about"
-        className="text-slate-700 hover:text-blue-600"
-      >
-        About One Community
-      </Link>
+      <footer className="w-full border-t border-slate-200 bg-white">
+        <div className="w-full px-4 py-4 sm:px-6 lg:px-10">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
+            <Link
+              id="footer-about"
+              to="/about"
+              className="text-slate-700 hover:text-blue-600"
+            >
+              About One Community
+            </Link>
 
-      <Link
-        id="footer-contact"
-        to="/contact"
-        className="text-slate-700 hover:text-blue-600"
-      >
-        Contact One Community
-      </Link>
+            <Link
+              id="footer-contact"
+              to="/contact"
+              className="text-slate-700 hover:text-blue-600"
+            >
+              Contact One Community
+            </Link>
 
-      <Link
-        id="footer-terms"
-        to="/terms"
-        className="text-slate-700 hover:text-blue-600"
-      >
-        Terms
-      </Link>
+            <Link
+              id="footer-terms"
+              to="/terms"
+              className="text-slate-700 hover:text-blue-600"
+            >
+              Terms
+            </Link>
 
-      <Link
-        id="footer-privacy"
-        to="/privacy"
-        className="text-slate-700 hover:text-blue-600"
-      >
-        Privacy
-      </Link>
+            <Link
+              id="footer-privacy"
+              to="/privacy"
+              className="text-slate-700 hover:text-blue-600"
+            >
+              Privacy
+            </Link>
 
-      <Link
-        id="footer-provider-auth"
-        to="/provider/auth"
-        className="font-medium text-blue-600 hover:text-blue-700"
-      >
-        Become a Provider
-      </Link>
+            <Link
+              id="footer-provider-auth"
+              to="/provider/auth"
+              className="font-medium text-blue-600 hover:text-blue-700"
+            >
+              Become a Provider
+            </Link>
+          </div>
+
+          <div className="mt-3 text-xs text-slate-500">
+            © {new Date().getFullYear()} One Community. All rights reserved.
+          </div>
+        </div>
+      </footer>
     </div>
-
-    <div className="mt-3 text-xs text-slate-500">
-      © {new Date().getFullYear()} One Community. All rights reserved.
-    </div>
-  </div>
-</footer>
-      </div>
-    );
+  );
 }

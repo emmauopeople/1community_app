@@ -22,9 +22,12 @@ export const supportApi = {
   },
 
   addProviderMessage: async (id, message) => {
-    const { data } = await api.post(`/provider/support-requests/${id}/messages`, {
-      message,
-    });
+    const { data } = await api.post(
+      `/provider/support-requests/${id}/messages`,
+      {
+        message,
+      },
+    );
     return data;
   },
 };

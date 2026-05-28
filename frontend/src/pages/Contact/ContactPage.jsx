@@ -79,17 +79,24 @@ export default function ContactPage() {
     <div className="min-h-screen bg-slate-50 text-slate-900">
       <header className="w-full sticky top-0 z-10 bg-gray-100 border-b border-gray-200">
         <div className="w-full px-4 sm:px-6 lg:px-10 h-14 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 text-gray-900 font-semibold">
-            <img src={appLogo} alt="One Community logo" className="h-8 w-8 object-contain" />
+          <Link
+            to="/"
+            className="flex items-center gap-2 text-gray-900 font-semibold"
+          >
+            <img
+              src={appLogo}
+              alt="One Community logo"
+              className="h-8 w-8 object-contain"
+            />
             <span className="text-base sm:text-lg">One Community</span>
           </Link>
 
           <Link
-  to="/"
-  className="h-10 px-4 inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-blue-600 to-emerald-500 text-white font-semibold shadow-sm hover:opacity-95 active:scale-[0.99] transition text-sm"
->
-  Back Home
-</Link>
+            to="/"
+            className="h-10 px-4 inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-blue-600 to-emerald-500 text-white font-semibold shadow-sm hover:opacity-95 active:scale-[0.99] transition text-sm"
+          >
+            Back Home
+          </Link>
         </div>
       </header>
 
@@ -98,8 +105,9 @@ export default function ContactPage() {
           <div>
             <h1 className="text-2xl font-semibold">Contact One Community</h1>
             <p className="mt-2 text-sm text-slate-600">
-              Send a message to the One Community admin team. Public users do not need an account.
-              We will reply through the email address you provide.
+              Send a message to the One Community admin team. Public users do
+              not need an account. We will reply through the email address you
+              provide.
             </p>
           </div>
 
@@ -117,7 +125,10 @@ export default function ContactPage() {
 
           <form onSubmit={handleSubmit} className="mt-5 space-y-4">
             <div>
-              <label htmlFor="contact-name" className="block text-sm font-medium text-slate-700">
+              <label
+                htmlFor="contact-name"
+                className="block text-sm font-medium text-slate-700"
+              >
                 Name
               </label>
               <input
@@ -131,7 +142,10 @@ export default function ContactPage() {
             </div>
 
             <div>
-              <label htmlFor="contact-email" className="block text-sm font-medium text-slate-700">
+              <label
+                htmlFor="contact-email"
+                className="block text-sm font-medium text-slate-700"
+              >
                 Email
               </label>
               <input
@@ -146,7 +160,10 @@ export default function ContactPage() {
             </div>
 
             <div>
-              <label htmlFor="contact-category" className="block text-sm font-medium text-slate-700">
+              <label
+                htmlFor="contact-category"
+                className="block text-sm font-medium text-slate-700"
+              >
                 Message Category
               </label>
               <select
@@ -164,7 +181,10 @@ export default function ContactPage() {
             </div>
 
             <div>
-              <label htmlFor="contact-subject" className="block text-sm font-medium text-slate-700">
+              <label
+                htmlFor="contact-subject"
+                className="block text-sm font-medium text-slate-700"
+              >
                 Subject
               </label>
               <input
@@ -178,7 +198,10 @@ export default function ContactPage() {
             </div>
 
             <div>
-              <label htmlFor="contact-description" className="block text-sm font-medium text-slate-700">
+              <label
+                htmlFor="contact-description"
+                className="block text-sm font-medium text-slate-700"
+              >
                 Message
               </label>
               <textarea
@@ -190,7 +213,8 @@ export default function ContactPage() {
                 required
               />
               <p className="mt-1 text-xs text-slate-500">
-                Please do not send passwords, payment details, or sensitive private information.
+                Please do not send passwords, payment details, or sensitive
+                private information.
               </p>
             </div>
 
