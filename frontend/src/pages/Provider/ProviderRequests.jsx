@@ -23,9 +23,12 @@ const statusLabels = {
 };
 
 function statusClass(status) {
-  if (status === "completed") return "bg-emerald-50 text-emerald-700 border-emerald-100";
-  if (status === "in_progress") return "bg-blue-50 text-blue-700 border-blue-100";
-  if (status === "closed") return "bg-slate-100 text-slate-700 border-slate-200";
+  if (status === "completed")
+    return "bg-emerald-50 text-emerald-700 border-emerald-100";
+  if (status === "in_progress")
+    return "bg-blue-50 text-blue-700 border-blue-100";
+  if (status === "closed")
+    return "bg-slate-100 text-slate-700 border-slate-200";
   if (status === "denied") return "bg-rose-50 text-rose-700 border-rose-100";
   return "bg-amber-50 text-amber-700 border-amber-100";
 }
@@ -59,7 +62,9 @@ export default function ProviderRequests() {
   const [reply, setReply] = useState("");
 
   const selectedCanReply = useMemo(() => {
-    return selected?.status === "incomplete" || selected?.status === "in_progress";
+    return (
+      selected?.status === "incomplete" || selected?.status === "in_progress"
+    );
   }, [selected]);
 
   const loadRequests = async () => {
@@ -188,8 +193,15 @@ export default function ProviderRequests() {
     <div className="min-h-screen bg-slate-50 flex flex-col text-slate-900">
       <header className="w-full sticky top-0 z-10 bg-gray-100 border-b border-gray-200">
         <div className="w-full px-4 sm:px-6 lg:px-10 h-14 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 text-gray-900 font-semibold">
-            <img src={appLogo} alt="One Community logo" className="h-8 w-8 object-contain" />
+          <Link
+            to="/"
+            className="flex items-center gap-2 text-gray-900 font-semibold"
+          >
+            <img
+              src={appLogo}
+              alt="One Community logo"
+              className="h-8 w-8 object-contain"
+            />
             <span className="text-base sm:text-lg">One Community</span>
           </Link>
 
@@ -217,8 +229,8 @@ export default function ProviderRequests() {
           <div>
             <h1 className="text-xl font-semibold">Provider Requests</h1>
             <p className="mt-1 text-sm text-slate-600">
-              Logged in as <span className="font-semibold">{user?.email}</span>. Submit requests
-              to admin and track responses/status here.
+              Logged in as <span className="font-semibold">{user?.email}</span>.
+              Submit requests to admin and track responses/status here.
             </p>
           </div>
 
@@ -240,7 +252,10 @@ export default function ProviderRequests() {
 
               <form onSubmit={createRequest} className="mt-4 space-y-4">
                 <div>
-                  <label htmlFor="request-name" className="block text-sm font-medium text-slate-700">
+                  <label
+                    htmlFor="request-name"
+                    className="block text-sm font-medium text-slate-700"
+                  >
                     Name
                   </label>
                   <input
@@ -330,7 +345,9 @@ export default function ProviderRequests() {
               </div>
 
               {loading ? (
-                <div className="mt-4 text-sm text-slate-600">Loading requests...</div>
+                <div className="mt-4 text-sm text-slate-600">
+                  Loading requests...
+                </div>
               ) : requests.length === 0 ? (
                 <div className="mt-4 rounded-xl border border-dashed border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
                   No requests yet. Create your first request using the form.
@@ -365,7 +382,8 @@ export default function ProviderRequests() {
                       </div>
 
                       <div className="mt-2 text-xs text-slate-500">
-                        Last updated: {formatDate(request.lastMessageAt || request.updatedAt)}
+                        Last updated:{" "}
+                        {formatDate(request.lastMessageAt || request.updatedAt)}
                       </div>
                     </button>
                   ))}
@@ -416,18 +434,24 @@ export default function ProviderRequests() {
 
             <div className="p-4">
               {drawerLoading ? (
-                <div className="text-sm text-slate-600">Loading conversation...</div>
+                <div className="text-sm text-slate-600">
+                  Loading conversation...
+                </div>
               ) : (
                 <>
                   <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
                     <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">
                       Request Details
                     </div>
-                    <p className="mt-2 text-sm text-slate-700">{selected.description}</p>
+                    <p className="mt-2 text-sm text-slate-700">
+                      {selected.description}
+                    </p>
                   </div>
 
                   <div className="mt-5">
-                    <h3 className="text-sm font-semibold">Communication Notes</h3>
+                    <h3 className="text-sm font-semibold">
+                      Communication Notes
+                    </h3>
 
                     {messages.length === 0 ? (
                       <div className="mt-3 rounded-xl border border-dashed border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
@@ -446,7 +470,9 @@ export default function ProviderRequests() {
                           >
                             <div className="flex items-start justify-between gap-3">
                               <div className="text-sm font-semibold text-slate-900">
-                                {message.senderType === "admin" ? "Admin" : "You"}
+                                {message.senderType === "admin"
+                                  ? "Admin"
+                                  : "You"}
                               </div>
                               <div className="text-xs text-slate-500">
                                 {formatDate(message.createdAt)}
@@ -462,7 +488,10 @@ export default function ProviderRequests() {
                   </div>
 
                   <form onSubmit={sendReply} className="mt-5">
-                    <label htmlFor="provider-reply" className="block text-sm font-medium text-slate-700">
+                    <label
+                      htmlFor="provider-reply"
+                      className="block text-sm font-medium text-slate-700"
+                    >
                       Add Follow-up Message
                     </label>
 
@@ -481,7 +510,9 @@ export default function ProviderRequests() {
 
                     <button
                       type="submit"
-                      disabled={!selectedCanReply || sendingMessage || !reply.trim()}
+                      disabled={
+                        !selectedCanReply || sendingMessage || !reply.trim()
+                      }
                       className="mt-3 h-11 w-full rounded-xl bg-gradient-to-r from-blue-600 to-emerald-500 text-white font-semibold shadow-sm hover:opacity-95 disabled:opacity-60 active:scale-[0.99] transition"
                     >
                       {sendingMessage ? "Sending..." : "Send Follow-up"}

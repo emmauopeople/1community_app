@@ -115,7 +115,9 @@ export default function ProviderSkills() {
         denied: true,
         error: "Geolocation not supported",
       }));
-      showError("Geolocation not supported. You need location enabled to create skills.");
+      showError(
+        "Geolocation not supported. You need location enabled to create skills.",
+      );
       return;
     }
 
@@ -125,12 +127,26 @@ export default function ProviderSkills() {
         const lng = pos?.coords?.longitude;
 
         if (typeof lat !== "number" || typeof lng !== "number") {
-          setGeo({ loading: false, ok: false, denied: true, error: "Invalid GPS coords", lat: null, lng: null });
+          setGeo({
+            loading: false,
+            ok: false,
+            denied: true,
+            error: "Invalid GPS coords",
+            lat: null,
+            lng: null,
+          });
           showError("Unable to read location. Please try again.");
           return;
         }
 
-        setGeo({ loading: false, ok: true, denied: false, error: "", lat, lng });
+        setGeo({
+          loading: false,
+          ok: true,
+          denied: false,
+          error: "",
+          lat,
+          lng,
+        });
         setForm((p) => ({ ...p, lat: String(lat), lng: String(lng) }));
       },
       (err) => {
@@ -146,10 +162,10 @@ export default function ProviderSkills() {
         showError(
           denied
             ? "Location permission is required to create skills. Enable location and try again."
-            : "Unable to get location. Try again."
+            : "Unable to get location. Try again.",
         );
       },
-      { enableHighAccuracy: true, timeout: 8000, maximumAge: 2 * 60 * 1000 }
+      { enableHighAccuracy: true, timeout: 8000, maximumAge: 2 * 60 * 1000 },
     );
   };
 
@@ -164,7 +180,9 @@ export default function ProviderSkills() {
       const data = await skillsApi.providerList();
       setSkills(data.skills || []);
     } catch (e) {
-      showError(e?.response?.data?.error || e?.message || "Failed to load skills.");
+      showError(
+        e?.response?.data?.error || e?.message || "Failed to load skills.",
+      );
     } finally {
       setLoading(false);
     }
@@ -230,11 +248,18 @@ export default function ProviderSkills() {
     const latNum = Number(form.lat);
     const lngNum = Number(form.lng);
     if (!Number.isFinite(latNum) || !Number.isFinite(lngNum)) {
-      return showError("GPS location is required. Enable location and try again.");
+      return showError(
+        "GPS location is required. Enable location and try again.",
+      );
     }
 
     try {
-      const payload = { ...form, category: resolvedCategory, lat: latNum, lng: lngNum };
+      const payload = {
+        ...form,
+        category: resolvedCategory,
+        lat: latNum,
+        lng: lngNum,
+      };
 
       if (editingId) {
         await skillsApi.providerUpdate(editingId, payload);
@@ -268,7 +293,7 @@ export default function ProviderSkills() {
     clearNotice();
     try {
       await api.post("/auth/logout");
-    } catch { }
+    } catch {}
     setUser(null);
     setMobileMenuOpen(false);
     navigate("/provider/auth", { replace: true });
@@ -286,8 +311,15 @@ export default function ProviderSkills() {
       {/* Header with hamburger (mobile) and inline nav (md+) */}
       <header className="w-full sticky top-0 z-20 bg-gray-100 border-b border-gray-200">
         <div className="w-full px-4 sm:px-6 lg:px-10 h-14 flex items-center justify-between gap-3">
-          <Link to="/" className="flex items-center gap-2 text-gray-900 font-semibold">
-            <img src={appLogo} alt="One Community logo" className="h-8 w-8 object-contain" />
+          <Link
+            to="/"
+            className="flex items-center gap-2 text-gray-900 font-semibold"
+          >
+            <img
+              src={appLogo}
+              alt="One Community logo"
+              className="h-8 w-8 object-contain"
+            />
             <span className="text-base sm:text-lg">One Community</span>
           </Link>
 
@@ -318,11 +350,11 @@ export default function ProviderSkills() {
               Real Estate
             </button>
             <Link
-  to="/provider/requests"
-  className="text-xs px-3 py-2 rounded-full bg-white border border-slate-200 text-slate-700 hover:bg-slate-50"
->
-  Requests
-</Link>
+              to="/provider/requests"
+              className="text-xs px-3 py-2 rounded-full bg-white border border-slate-200 text-slate-700 hover:bg-slate-50"
+            >
+              Requests
+            </Link>
             <Link
               to="/provider/profile"
               className="text-xs px-3 py-2 rounded-full bg-white border border-slate-200 text-slate-700 hover:bg-slate-50"
@@ -356,7 +388,14 @@ export default function ProviderSkills() {
         </div>
 
         {/* Mobile dropdown panel */}
-        <div id={menuId} className={mobileMenuOpen ? "md:hidden border-t border-slate-200 bg-white" : "hidden"}>
+        <div
+          id={menuId}
+          className={
+            mobileMenuOpen
+              ? "md:hidden border-t border-slate-200 bg-white"
+              : "hidden"
+          }
+        >
           <div className="px-4 sm:px-6 lg:px-10 py-3 space-y-2">
             <div className="text-xs font-semibold text-slate-500">Menu</div>
 
@@ -392,12 +431,12 @@ export default function ProviderSkills() {
               Real Estate (soon)
             </button>
             <Link
-  to="/provider/requests"
-  onClick={() => setMobileMenuOpen(false)}
-  className="block w-full h-11 rounded-xl border border-slate-200 bg-white text-slate-700 font-medium text-sm text-left px-3 leading-[44px]"
->
-  Requests
-</Link>
+              to="/provider/requests"
+              onClick={() => setMobileMenuOpen(false)}
+              className="block w-full h-11 rounded-xl border border-slate-200 bg-white text-slate-700 font-medium text-sm text-left px-3 leading-[44px]"
+            >
+              Requests
+            </Link>
             <Link
               to="/provider/profile"
               onClick={() => setMobileMenuOpen(false)}
@@ -419,14 +458,22 @@ export default function ProviderSkills() {
 
       {/* Back-to-search OUTSIDE header */}
       <div className="w-full px-4 sm:px-6 lg:px-10 pt-3">
-        <button type="button" onClick={() => navigate("/search?loc=near")} className="text-sm text-blue-700 hover:underline">
+        <button
+          type="button"
+          onClick={() => navigate("/search?loc=near")}
+          className="text-sm text-blue-700 hover:underline"
+        >
           ← Go to search
         </button>
       </div>
 
       <main className="flex-1 mx-auto max-w-5xl w-full px-4 py-5">
         {notice.text ? (
-          <div className={`mb-4 rounded-xl border px-3 py-2 text-sm ${noticeClass}`}>{notice.text}</div>
+          <div
+            className={`mb-4 rounded-xl border px-3 py-2 text-sm ${noticeClass}`}
+          >
+            {notice.text}
+          </div>
         ) : null}
 
         {/* GPS status */}
@@ -487,7 +534,9 @@ export default function ProviderSkills() {
                       className="rounded-xl border border-slate-100 p-3 flex items-start justify-between gap-3"
                     >
                       <div className="min-w-0">
-                        <div className="text-sm font-semibold truncate">{s.title}</div>
+                        <div className="text-sm font-semibold truncate">
+                          {s.title}
+                        </div>
                         <div className="text-xs text-slate-600 truncate">
                           {s.category} • {s.city}
                         </div>
@@ -499,7 +548,9 @@ export default function ProviderSkills() {
                             className="mt-2 h-16 w-24 object-cover rounded-lg border"
                           />
                         ) : (
-                          <div className="mt-2 text-xs text-slate-500">No image yet</div>
+                          <div className="mt-2 text-xs text-slate-500">
+                            No image yet
+                          </div>
                         )}
                       </div>
 
@@ -531,9 +582,14 @@ export default function ProviderSkills() {
           </div>
 
           {/* Right: form */}
-          <div ref={formRef} className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
+          <div
+            ref={formRef}
+            className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm"
+          >
             <div className="flex items-center justify-between gap-3">
-              <div className="text-sm font-semibold">{editingId ? "Edit skill" : "Create skill"}</div>
+              <div className="text-sm font-semibold">
+                {editingId ? "Edit skill" : "Create skill"}
+              </div>
 
               {/* Existing New Skill button (desktop + mobile) */}
               <button
@@ -554,7 +610,9 @@ export default function ProviderSkills() {
                 className="h-11 w-full rounded-xl border border-slate-200 px-3 text-sm outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400"
                 placeholder="Title"
                 value={form.title}
-                onChange={(e) => setForm((p) => ({ ...p, title: e.target.value }))}
+                onChange={(e) =>
+                  setForm((p) => ({ ...p, title: e.target.value }))
+                }
               />
 
               {/* Category dropdown + Other */}
@@ -593,14 +651,18 @@ export default function ProviderSkills() {
                 className="h-11 w-full rounded-xl border border-slate-200 px-3 text-sm outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400"
                 placeholder="Tags (comma separated)"
                 value={form.tags}
-                onChange={(e) => setForm((p) => ({ ...p, tags: e.target.value }))}
+                onChange={(e) =>
+                  setForm((p) => ({ ...p, tags: e.target.value }))
+                }
               />
 
               <textarea
                 className="min-h-[96px] w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400"
                 placeholder="Description"
                 value={form.description}
-                onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))}
+                onChange={(e) =>
+                  setForm((p) => ({ ...p, description: e.target.value }))
+                }
               />
 
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -608,25 +670,33 @@ export default function ProviderSkills() {
                   className="h-11 w-full rounded-xl border border-slate-200 px-3 text-sm outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400"
                   placeholder="Country (e.g., CM)"
                   value={form.country}
-                  onChange={(e) => setForm((p) => ({ ...p, country: e.target.value }))}
+                  onChange={(e) =>
+                    setForm((p) => ({ ...p, country: e.target.value }))
+                  }
                 />
                 <input
                   className="h-11 w-full rounded-xl border border-slate-200 px-3 text-sm outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400"
                   placeholder="Region/Province"
                   value={form.region}
-                  onChange={(e) => setForm((p) => ({ ...p, region: e.target.value }))}
+                  onChange={(e) =>
+                    setForm((p) => ({ ...p, region: e.target.value }))
+                  }
                 />
                 <input
                   className="h-11 w-full rounded-xl border border-slate-200 px-3 text-sm outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400"
                   placeholder="City"
                   value={form.city}
-                  onChange={(e) => setForm((p) => ({ ...p, city: e.target.value }))}
+                  onChange={(e) =>
+                    setForm((p) => ({ ...p, city: e.target.value }))
+                  }
                 />
                 <input
                   className="h-11 w-full rounded-xl border border-slate-200 px-3 text-sm outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400"
                   placeholder="Area/Town"
                   value={form.area}
-                  onChange={(e) => setForm((p) => ({ ...p, area: e.target.value }))}
+                  onChange={(e) =>
+                    setForm((p) => ({ ...p, area: e.target.value }))
+                  }
                 />
               </div>
 
