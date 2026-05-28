@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { skillsApi } from "../../app/api/skills.api";
 import { contactApi } from "../../app/api/contact.api";
 import { eventsApi } from "../../app/api/events.api";
@@ -150,8 +156,8 @@ export default function SkillModal({ skillId, onClose }) {
     notice.type === "success"
       ? "border-emerald-200 bg-emerald-50 text-emerald-700"
       : notice.type === "error"
-      ? "border-orange-200 bg-orange-50 text-orange-700"
-      : "";
+        ? "border-orange-200 bg-orange-50 text-orange-700"
+        : "";
 
   const current = useMemo(() => {
     if (!Array.isArray(media) || media.length === 0) return null;
@@ -214,7 +220,7 @@ export default function SkillModal({ skillId, onClose }) {
       }
       if (e.key === "ArrowLeft") {
         setIdx((p) =>
-          media.length ? (p - 1 + media.length) % media.length : p
+          media.length ? (p - 1 + media.length) % media.length : p,
         );
       }
     };
@@ -228,9 +234,7 @@ export default function SkillModal({ skillId, onClose }) {
   };
 
   const prev = () => {
-    setIdx((p) =>
-      media.length ? (p - 1 + media.length) % media.length : p
-    );
+    setIdx((p) => (media.length ? (p - 1 + media.length) % media.length : p));
   };
 
   const openLightbox = () => {
@@ -254,13 +258,13 @@ export default function SkillModal({ skillId, onClose }) {
     });
 
     const text = encodeURIComponent(
-      `Hello, I found your service on One Community: ${skill?.title || ""}`
+      `Hello, I found your service on One Community: ${skill?.title || ""}`,
     );
 
     window.open(
       `https://wa.me/${phoneDigits}?text=${text}`,
       "_blank",
-      "noopener,noreferrer"
+      "noopener,noreferrer",
     );
   };
 

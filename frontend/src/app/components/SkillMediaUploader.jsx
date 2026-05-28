@@ -76,11 +76,7 @@ async function compressImageIfNeeded(file) {
     ctx.drawImage(img, 0, 0, width, height);
 
     const compressedBlob = await new Promise((resolve) => {
-      canvas.toBlob(
-        resolve,
-        "image/jpeg",
-        0.75
-      );
+      canvas.toBlob(resolve, "image/jpeg", 0.75);
     });
 
     if (!compressedBlob) {
@@ -93,7 +89,7 @@ async function compressImageIfNeeded(file) {
       {
         type: "image/jpeg",
         lastModified: Date.now(),
-      }
+      },
     );
 
     console.log("IMAGE COMPRESSED:", {
@@ -142,38 +138,38 @@ export default function SkillMediaUploader({ skillId, onUploaded, onError }) {
   }, [filesBySlot]);
 
   const setSlot = async (slot, file) => {
-  setNotice({ type: "", text: "" });
+    setNotice({ type: "", text: "" });
 
-  if (!file) {
-    return setFilesBySlot((previous) => ({
-      ...previous,
-      [slot]: null,
-    }));
-  }
-
-  try {
-    const compressedFile = await compressImageIfNeeded(file);
-    const mime = normalizeMime(compressedFile.type, compressedFile.name);
-
-    if (!ALLOWED.has(mime)) {
-      return showError("Only JPG, PNG, or WEBP images are allowed.");
+    if (!file) {
+      return setFilesBySlot((previous) => ({
+        ...previous,
+        [slot]: null,
+      }));
     }
 
-    if (compressedFile.size > MAX_BYTES) {
-      return showError(
-        "Image is still too large after compression. Please choose a smaller image."
-      );
-    }
+    try {
+      const compressedFile = await compressImageIfNeeded(file);
+      const mime = normalizeMime(compressedFile.type, compressedFile.name);
 
-    setFilesBySlot((previous) => ({
-      ...previous,
-      [slot]: compressedFile,
-    }));
-  } catch (error) {
-    console.error("IMAGE COMPRESSION FAILED:", error);
-    showError("Could not prepare this image. Please try another image.");
-  }
-};
+      if (!ALLOWED.has(mime)) {
+        return showError("Only JPG, PNG, or WEBP images are allowed.");
+      }
+
+      if (compressedFile.size > MAX_BYTES) {
+        return showError(
+          "Image is still too large after compression. Please choose a smaller image.",
+        );
+      }
+
+      setFilesBySlot((previous) => ({
+        ...previous,
+        [slot]: compressedFile,
+      }));
+    } catch (error) {
+      console.error("IMAGE COMPRESSION FAILED:", error);
+      showError("Could not prepare this image. Please try another image.");
+    }
+  };
 
   const upload = async () => {
     try {
@@ -243,9 +239,7 @@ export default function SkillMediaUploader({ skillId, onUploaded, onError }) {
               key={slot}
               className="rounded-xl border border-slate-100 bg-slate-50 p-3"
             >
-              <div className="mb-2 text-xs text-slate-600">
-                Slot {slot + 1}
-              </div>
+              <div className="mb-2 text-xs text-slate-600">Slot {slot + 1}</div>
 
               <input
                 id={inputId}
@@ -253,9 +247,9 @@ export default function SkillMediaUploader({ skillId, onUploaded, onError }) {
                 accept="image/jpeg,image/png,image/webp"
                 disabled={busy}
                 onChange={(event) => {
-  setSlot(slot, event.target.files?.[0] || null);
-  event.target.value = "";
-}}
+                  setSlot(slot, event.target.files?.[0] || null);
+                  event.target.value = "";
+                }}
                 className="hidden"
               />
 
@@ -288,7 +282,9 @@ export default function SkillMediaUploader({ skillId, onUploaded, onError }) {
       </div>
 
       {notice.text ? (
-        <div className={`mt-3 rounded-xl border px-3 py-2 text-sm ${noticeClass}`}>
+        <div
+          className={`mt-3 rounded-xl border px-3 py-2 text-sm ${noticeClass}`}
+        >
           {notice.text}
         </div>
       ) : null}
@@ -303,7 +299,8 @@ export default function SkillMediaUploader({ skillId, onUploaded, onError }) {
       </button>
 
       <div className="mt-2 text-xs text-slate-500">
-        Images upload through the secure backend API, then are stored in private S3.
+        Images upload through the secure backend API, then are stored in private
+        S3.
       </div>
     </div>
   );

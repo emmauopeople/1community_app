@@ -8,7 +8,9 @@ function getApiError(ex, fallback) {
 }
 
 function isValidPhone(phone) {
-  const p = String(phone || "").trim().replace(/\s+/g, "");
+  const p = String(phone || "")
+    .trim()
+    .replace(/\s+/g, "");
   return /^\+?\d{8,15}$/.test(p);
 }
 
@@ -97,8 +99,15 @@ export default function ProviderProfile() {
       {/* Header */}
       <header className="w-full sticky top-0 z-10 bg-gray-100 border-b border-gray-200">
         <div className="w-full px-4 sm:px-6 lg:px-10 h-14 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 text-gray-900 font-semibold">
-            <img src={appLogo} alt="One Community logo" className="h-8 w-8 object-contain" />
+          <Link
+            to="/"
+            className="flex items-center gap-2 text-gray-900 font-semibold"
+          >
+            <img
+              src={appLogo}
+              alt="One Community logo"
+              className="h-8 w-8 object-contain"
+            />
             <span className="text-base sm:text-lg">One Community</span>
           </Link>
 
@@ -113,7 +122,10 @@ export default function ProviderProfile() {
 
       {/* Back */}
       <div className="w-full px-4 sm:px-6 lg:px-10 pt-3">
-        <Link to="/provider/skills" className="text-sm text-blue-700 hover:underline">
+        <Link
+          to="/provider/skills"
+          className="text-sm text-blue-700 hover:underline"
+        >
           ← Back
         </Link>
       </div>
@@ -124,7 +136,9 @@ export default function ProviderProfile() {
             <div className="flex items-start justify-between gap-3">
               <div>
                 <h1 className="text-xl font-semibold">Provider Profile</h1>
-                <p className="mt-1 text-sm text-slate-600">Update your display name and phone number.</p>
+                <p className="mt-1 text-sm text-slate-600">
+                  Update your display name and phone number.
+                </p>
               </div>
               <button
                 type="button"
@@ -140,7 +154,9 @@ export default function ProviderProfile() {
               <div
                 className={
                   "mt-3 rounded-xl border px-3 py-2 text-sm " +
-                  (err ? "border-orange-200 bg-orange-50 text-orange-700" : "border-emerald-200 bg-emerald-50 text-emerald-700")
+                  (err
+                    ? "border-orange-200 bg-orange-50 text-orange-700"
+                    : "border-emerald-200 bg-emerald-50 text-emerald-700")
                 }
               >
                 {err || msg}
@@ -152,7 +168,8 @@ export default function ProviderProfile() {
             ) : (
               <form className="mt-4 space-y-3" onSubmit={onSave}>
                 <div className="text-xs text-slate-500">
-                  Logged in as: <span className="font-semibold">{profile?.email}</span>
+                  Logged in as:{" "}
+                  <span className="font-semibold">{profile?.email}</span>
                 </div>
 
                 <input
@@ -185,7 +202,8 @@ export default function ProviderProfile() {
                 </button>
 
                 <div className="text-xs text-slate-500">
-                  Display name will appear in public search results and skill details.
+                  Display name will appear in public search results and skill
+                  details.
                 </div>
               </form>
             )}
