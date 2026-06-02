@@ -14,6 +14,7 @@ import mediaRoutes from "./routes/media.js";
 import contactRoutes from "./routes/contact.js";
 import profileRoutes from "./routes/profile.js";
 import metricsRoutes from "./routes/metrics.js";
+import supportRoutes from "./routes/support.js";
 
 const app = express();
 
@@ -24,7 +25,7 @@ app.use("/metrics", metricsRoutes);
 const allowedOrigins = [
   "https://www.cameroonskills.org",
   "https://cameroonskills.org",
-  "http://localhost:5173"
+  "http://localhost:5173",
 ];
 
 app.use(
@@ -38,7 +39,7 @@ app.use(
       }
     },
     credentials: true,
-  })
+  }),
 );
 
 app.use(express.json());
@@ -52,7 +53,7 @@ app.use(
     max: 100,
     standardHeaders: true,
     legacyHeaders: false,
-  })
+  }),
 );
 
 app.use(healthRoutes);
@@ -63,6 +64,7 @@ app.use("/events", eventsRoutes);
 app.use(analyticsRoutes);
 app.use(mediaRoutes);
 app.use(contactRoutes);
+app.use(supportRoutes);
 app.use(profileRoutes);
 
 app.get("/api/hello", (req, res) =>
@@ -70,7 +72,7 @@ app.get("/api/hello", (req, res) =>
     message: "Hello from 1community backend up 👋",
     env: process.env.NODE_ENV || "dev",
     time: new Date().toISOString(),
-  })
+  }),
 );
 
 export default app;

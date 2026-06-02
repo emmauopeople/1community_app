@@ -12,12 +12,15 @@ import ProviderProfile from "./pages/Provider/ProviderProfile.jsx";
 
 // keep this import if your file is here
 import ProviderSkills from "./app/pages/provider/ProviderSkills.jsx";
+import ContactPage from "./pages/Contact/ContactPage.jsx";
+import ProviderRequests from "./pages/Provider/ProviderRequests.jsx";
 
 export default function App() {
   return (
     <AuthProvider>
       <Routes>
         <Route path="/" element={<LandingPage />} />
+        <Route path="/contact" element={<ContactPage />} />
         <Route path="/provider/auth" element={<ProviderAuth />} />
 
         <Route
@@ -43,6 +46,14 @@ export default function App() {
           element={
             <ProviderGuard>
               <ProviderProfile />
+            </ProviderGuard>
+          }
+        />
+        <Route
+          path="/provider/requests"
+          element={
+            <ProviderGuard>
+              <ProviderRequests />
             </ProviderGuard>
           }
         />

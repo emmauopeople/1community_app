@@ -8,7 +8,8 @@ const pool = new Pool(
     ? {
         connectionString: process.env.DATABASE_URL,
         ssl:
-          process.env.PGSSLMODE === "require" || process.env.PGSSLMODE === "no-verify"
+          process.env.PGSSLMODE === "require" ||
+          process.env.PGSSLMODE === "no-verify"
             ? { rejectUnauthorized: process.env.PGSSLMODE !== "no-verify" }
             : undefined,
       }
@@ -19,10 +20,11 @@ const pool = new Pool(
         password: process.env.DB_PASSWORD,
         database: process.env.DB_NAME,
         ssl:
-          process.env.PGSSLMODE === "require" || process.env.PGSSLMODE === "no-verify"
+          process.env.PGSSLMODE === "require" ||
+          process.env.PGSSLMODE === "no-verify"
             ? { rejectUnauthorized: process.env.PGSSLMODE !== "no-verify" }
             : undefined,
-      }
+      },
 );
 
 export function query(text, params) {

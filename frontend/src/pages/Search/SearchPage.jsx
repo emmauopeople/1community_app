@@ -32,9 +32,17 @@ export default function SearchPage() {
   const [q, setQ] = useState(params.get("q") || "");
   const [category, setCategory] = useState(params.get("category") || "");
   const [city, setCity] = useState(params.get("city") || "");
-  const [useNearMe, setUseNearMe] = useState((params.get("loc") || "") === "near");
+  const [useNearMe, setUseNearMe] = useState(
+    (params.get("loc") || "") === "near",
+  );
 
-  const [gps, setGps] = useState({ loading: false, ok: false, lat: null, lng: null, error: "" });
+  const [gps, setGps] = useState({
+    loading: false,
+    ok: false,
+    lat: null,
+    lng: null,
+    error: "",
+  });
   const [loading, setLoading] = useState(false);
   const [notice, setNotice] = useState({ type: "", text: "" });
   const [results, setResults] = useState([]);
@@ -45,8 +53,8 @@ export default function SearchPage() {
     notice.type === "success"
       ? "border-emerald-200 bg-emerald-50 text-emerald-700"
       : notice.type === "error"
-      ? "border-orange-200 bg-orange-50 text-orange-700"
-      : "";
+        ? "border-orange-200 bg-orange-50 text-orange-700"
+        : "";
 
   const pushUrl = (next) => {
     const sp = new URLSearchParams();
@@ -62,8 +70,17 @@ export default function SearchPage() {
     setGps({ loading: true, ok: false, lat: null, lng: null, error: "" });
 
     if (!navigator.geolocation) {
-      setGps({ loading: false, ok: false, lat: null, lng: null, error: "Geolocation not supported" });
-      setNotice({ type: "error", text: "Geolocation not supported on this device/browser." });
+      setGps({
+        loading: false,
+        ok: false,
+        lat: null,
+        lng: null,
+        error: "Geolocation not supported",
+      });
+      setNotice({
+        type: "error",
+        text: "Geolocation not supported on this device/browser.",
+      });
       return;
     }
 
@@ -72,20 +89,35 @@ export default function SearchPage() {
         const lat = pos?.coords?.latitude;
         const lng = pos?.coords?.longitude;
         if (typeof lat !== "number" || typeof lng !== "number") {
-          setGps({ loading: false, ok: false, lat: null, lng: null, error: "Invalid coordinates" });
-          setNotice({ type: "error", text: "Unable to read location. Try again." });
+          setGps({
+            loading: false,
+            ok: false,
+            lat: null,
+            lng: null,
+            error: "Invalid coordinates",
+          });
+          setNotice({
+            type: "error",
+            text: "Unable to read location. Try again.",
+          });
           return;
         }
         setGps({ loading: false, ok: true, lat, lng, error: "" });
       },
       (err) => {
-        setGps({ loading: false, ok: false, lat: null, lng: null, error: err?.message || "Denied" });
+        setGps({
+          loading: false,
+          ok: false,
+          lat: null,
+          lng: null,
+          error: err?.message || "Denied",
+        });
         setNotice({
           type: "error",
           text: "Location permission denied/unavailable. Turn on location or search by city.",
         });
       },
-      { enableHighAccuracy: true, timeout: 8000, maximumAge: 2 * 60 * 1000 }
+      { enableHighAccuracy: true, timeout: 8000, maximumAge: 2 * 60 * 1000 },
     );
   };
 
@@ -102,7 +134,10 @@ export default function SearchPage() {
 
       if (near) {
         if (!gps.ok) {
-          setNotice({ type: "error", text: "Enable location (GPS) for near-me results." });
+          setNotice({
+            type: "error",
+            text: "Enable location (GPS) for near-me results.",
+          });
           setResults([]);
           return;
         }
@@ -114,10 +149,16 @@ export default function SearchPage() {
       const data = await skillsApi.publicSearch(searchParams);
       setResults(data?.results || []);
       if ((data?.results || []).length === 0) {
-        setNotice({ type: "error", text: "No results found. Try another search." });
+        setNotice({
+          type: "error",
+          text: "No results found. Try another search.",
+        });
       }
     } catch (e) {
-      setNotice({ type: "error", text: e?.response?.data?.error || e?.message || "Search failed." });
+      setNotice({
+        type: "error",
+        text: e?.response?.data?.error || e?.message || "Search failed.",
+      });
       setResults([]);
     } finally {
       setLoading(false);
@@ -140,7 +181,12 @@ export default function SearchPage() {
     if (nextNear && !gps.ok && !gps.loading) {
       requestGPS();
     } else {
-      runSearch({ qVal: nextQ, catVal: nextCat, cityVal: nextCity, near: nextNear });
+      runSearch({
+        qVal: nextQ,
+        catVal: nextCat,
+        cityVal: nextCity,
+        near: nextNear,
+      });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loc.search]);
@@ -155,7 +201,12 @@ export default function SearchPage() {
 
   const onSubmit = (e) => {
     e.preventDefault();
-    pushUrl({ q: norm(q), category: norm(category), city: norm(city), loc: useNearMe ? "near" : "" });
+    pushUrl({
+      q: norm(q),
+      category: norm(category),
+      city: norm(city),
+      loc: useNearMe ? "near" : "",
+    });
   };
 
   return (
@@ -163,8 +214,15 @@ export default function SearchPage() {
       {/* Header */}
       <header className="w-full sticky top-0 z-10 bg-gray-100 border-b border-gray-200">
         <div className="w-full px-4 sm:px-6 lg:px-10 h-14 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 text-gray-900 font-semibold">
-            <img src={appLogo} alt="One Community logo" className="h-8 w-8 object-contain" />
+          <Link
+            to="/"
+            className="flex items-center gap-2 text-gray-900 font-semibold"
+          >
+            <img
+              src={appLogo}
+              alt="One Community logo"
+              className="h-8 w-8 object-contain"
+            />
             <span className="text-base sm:text-lg">One Community</span>
           </Link>
 
@@ -180,7 +238,10 @@ export default function SearchPage() {
       {/* Full-width main (no max-w “50%” effect) */}
       <main className="flex-1 w-full px-3 sm:px-6 lg:px-10 2xl:px-16 py-5">
         {/* Search controls */}
-        <form onSubmit={onSubmit} className="bg-white rounded-2xl shadow-sm border border-slate-100 p-4">
+        <form
+          onSubmit={onSubmit}
+          className="bg-white rounded-2xl shadow-sm border border-slate-100 p-4"
+        >
           <div className="text-sm font-semibold">Search skills</div>
 
           <div className="mt-3 space-y-3">
@@ -245,19 +306,29 @@ export default function SearchPage() {
               Search
             </button>
 
-            {gps.loading ? <div className="text-xs text-slate-600">Getting location…</div> : null}
-            {gps.error ? <div className="text-xs text-orange-700">GPS: {gps.error}</div> : null}
+            {gps.loading ? (
+              <div className="text-xs text-slate-600">Getting location…</div>
+            ) : null}
+            {gps.error ? (
+              <div className="text-xs text-orange-700">GPS: {gps.error}</div>
+            ) : null}
           </div>
         </form>
 
         {notice.text ? (
-          <div className={`mt-4 rounded-xl border px-3 py-2 text-sm ${noticeClass}`}>{notice.text}</div>
+          <div
+            className={`mt-4 rounded-xl border px-3 py-2 text-sm ${noticeClass}`}
+          >
+            {notice.text}
+          </div>
         ) : null}
 
         {/* Results: 2 columns on phone */}
         <div className="mt-4 grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5">
           {loading ? (
-            <div className="col-span-2 text-sm text-slate-600">Loading results…</div>
+            <div className="col-span-2 text-sm text-slate-600">
+              Loading results…
+            </div>
           ) : (
             results.map((r) => (
               <button
@@ -268,7 +339,11 @@ export default function SearchPage() {
               >
                 <div className="h-28 sm:h-40 w-full bg-slate-100">
                   {r.indexImageUrl ? (
-                    <img src={r.indexImageUrl} alt={r.title} className="h-full w-full object-cover" />
+                    <img
+                      src={r.indexImageUrl}
+                      alt={r.title}
+                      className="h-full w-full object-cover"
+                    />
                   ) : (
                     <div className="h-full w-full flex items-center justify-center text-xs text-slate-500">
                       No image
@@ -277,12 +352,16 @@ export default function SearchPage() {
                 </div>
 
                 <div className="p-2 sm:p-3">
-                  <div className="text-sm font-semibold truncate">{r.title}</div>
+                  <div className="text-sm font-semibold truncate">
+                    {r.title}
+                  </div>
                   <div className="mt-1 text-xs text-slate-600 truncate">
                     {r.category} • {r.city}
                   </div>
                   {typeof r.distance_km === "number" ? (
-                    <div className="mt-1 text-xs text-slate-500">{r.distance_km.toFixed(1)} km</div>
+                    <div className="mt-1 text-xs text-slate-500">
+                      {r.distance_km.toFixed(1)} km
+                    </div>
                   ) : null}
                 </div>
               </button>
@@ -292,7 +371,12 @@ export default function SearchPage() {
       </main>
 
       {/* Modal */}
-      {openSkillId ? <SkillModal skillId={openSkillId} onClose={() => setOpenSkillId(null)} /> : null}
+      {openSkillId ? (
+        <SkillModal
+          skillId={openSkillId}
+          onClose={() => setOpenSkillId(null)}
+        />
+      ) : null}
 
       <footer className="w-full bg-white border-t border-slate-200">
         <div className="w-full px-4 sm:px-6 lg:px-10 py-4 text-xs text-slate-500">
