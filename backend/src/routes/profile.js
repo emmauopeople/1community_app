@@ -17,6 +17,30 @@ function validPhone(s) {
   return /^[+]?[0-9]{8,15}$/.test(s);
 }
 
+// GET /providers/:providerId/public
+// Public provider profile for service-discovery clients.
+router.get("/providers/:providerId/public", async (req, res) => {
+  try {
+    const providerId = Number(req.params.providerId);
+    if (!providerId) return res.status(400).json({ error: "Invalid provider id" });
+
+    const r = await query(
+      `SELECT id, email, phone, role, status, display_name, created_at, updated_at
+       FROM users
+       WHERE id=$1 AND role='provider' AND status='active'`,
+      [providerId],
+    );
+
+    if (r.rowCount === 0)
+      return res.status(404).json({ error: "Provider not found" });
+
+    return res.json({ provider: r.rows[0] });
+  } catch (e) {
+    console.error("PUBLIC PROVIDER PROFILE ERROR:", e);
+    return res.status(500).json({ error: "Failed to load provider profile" });
+  }
+});
+
 // GET /provider/profile
 router.get(
   "/provider/profile",
