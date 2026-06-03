@@ -271,13 +271,14 @@ router.delete(
 );
 
 /** -------------------------
- * Public: Search (case-insensitive + q vs category)
+ * Public: Search (case-insensitive; supports country, region, city, area, category, q, and GPS)
  * ------------------------*/
 router.get("/skills/search", async (req, res) => {
   try {
     const country = normLower(req.query.country);
     const region = normLower(req.query.region);
     const city = normLower(req.query.city);
+    const area = normLower(req.query.area);
 
     // MUTUAL EXCLUSIVE (backend-safe):
     // if q present -> ignore category
@@ -307,6 +308,10 @@ router.get("/skills/search", async (req, res) => {
       params.push(city);
       where += ` AND LOWER(s.city) = $${params.length}`;
     }
+    if (area) {
+      params.push(`%${area}%`);
+      where += ` AND LOWER(s.area) LIKE $${params.length}`;
+    }
     if (category) {
       params.push(category);
       where += ` AND LOWER(s.category) = $${params.length}`;
@@ -315,7 +320,7 @@ router.get("/skills/search", async (req, res) => {
     if (q) {
       params.push(`%${q}%`);
       const p = `$${params.length}`;
-      where += ` AND (s.title ILIKE ${p} OR s.description ILIKE ${p} OR s.tags ILIKE ${p})`;
+      where += ` AND (s.title ILIKE ${p} OR s.description ILIKE ${p} OR s.tags ILIKE ${p} OR s.area ILIKE ${p} OR s.city ILIKE ${p} OR s.region ILIKE ${p})`;
     }
 
     const hasGeo = Number.isFinite(lat) && Number.isFinite(lng);
@@ -381,6 +386,7 @@ router.get("/skills/search", async (req, res) => {
           country,
           region,
           city,
+          area,
           category,
           q,
           lat,
