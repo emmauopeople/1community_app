@@ -32,6 +32,7 @@ export default function SearchPage() {
   const [q, setQ] = useState(params.get("q") || "");
   const [category, setCategory] = useState(params.get("category") || "");
   const [city, setCity] = useState(params.get("city") || "");
+  const [area, setArea] = useState(params.get("area") || "");
   const [useNearMe, setUseNearMe] = useState(
     (params.get("loc") || "") === "near",
   );
@@ -61,6 +62,7 @@ export default function SearchPage() {
     if (next.q) sp.set("q", next.q);
     if (next.category) sp.set("category", next.category);
     if (next.city) sp.set("city", next.city);
+    if (next.area) sp.set("area", next.area);
     if (next.loc === "near") sp.set("loc", "near");
     navigate(`/search?${sp.toString()}`);
   };
@@ -114,14 +116,14 @@ export default function SearchPage() {
         });
         setNotice({
           type: "error",
-          text: "Location permission denied/unavailable. Turn on location or search by city.",
+          text: "Location permission denied/unavailable. Turn on location or search by city or area.",
         });
       },
       { enableHighAccuracy: true, timeout: 8000, maximumAge: 2 * 60 * 1000 },
     );
   };
 
-  const runSearch = async ({ qVal, catVal, cityVal, near }) => {
+  const runSearch = async ({ qVal, catVal, cityVal, areaVal, near }) => {
     setLoading(true);
     setNotice({ type: "", text: "" });
 
@@ -130,6 +132,7 @@ export default function SearchPage() {
         q: norm(qVal),
         category: norm(catVal),
         city: near ? "" : norm(cityVal),
+        area: near ? "" : norm(areaVal),
       };
 
       if (near) {
@@ -151,7 +154,7 @@ export default function SearchPage() {
       if ((data?.results || []).length === 0) {
         setNotice({
           type: "error",
-          text: "No results found. Try another search.",
+          text: "No results found. Try another service, city, or area.",
         });
       }
     } catch (e) {
@@ -171,11 +174,13 @@ export default function SearchPage() {
     const nextQ = sp.get("q") || "";
     const nextCat = sp.get("category") || "";
     const nextCity = sp.get("city") || "";
+    const nextArea = sp.get("area") || "";
     const nextNear = (sp.get("loc") || "") === "near";
 
     setQ(nextQ);
     setCategory(nextCat);
     setCity(nextCity);
+    setArea(nextArea);
     setUseNearMe(nextNear);
 
     if (nextNear && !gps.ok && !gps.loading) {
@@ -185,6 +190,7 @@ export default function SearchPage() {
         qVal: nextQ,
         catVal: nextCat,
         cityVal: nextCity,
+        areaVal: nextArea,
         near: nextNear,
       });
     }
@@ -194,7 +200,13 @@ export default function SearchPage() {
   // If GPS becomes available after asking, re-run near search automatically
   useEffect(() => {
     if (useNearMe && gps.ok) {
-      runSearch({ qVal: q, catVal: category, cityVal: city, near: true });
+      runSearch({
+        qVal: q,
+        catVal: category,
+        cityVal: city,
+        areaVal: area,
+        near: true,
+      });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gps.ok]);
@@ -205,6 +217,7 @@ export default function SearchPage() {
       q: norm(q),
       category: norm(category),
       city: norm(city),
+      area: norm(area),
       loc: useNearMe ? "near" : "",
     });
   };
@@ -266,12 +279,22 @@ export default function SearchPage() {
               </select>
 
               <input
-                className={`h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 sm:col-span-2 ${
+                className={`h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 ${
                   useNearMe ? "opacity-60" : ""
                 }`}
-                placeholder="City (e.g., Douala)"
+                placeholder="City (e.g., Yaounde)"
                 value={city}
                 onChange={(e) => setCity(e.target.value)}
+                disabled={useNearMe}
+              />
+
+              <input
+                className={`h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 ${
+                  useNearMe ? "opacity-60" : ""
+                }`}
+                placeholder="Area (e.g., Emana, Mvog-Mbi)"
+                value={area}
+                onChange={(e) => setArea(e.target.value)}
                 disabled={useNearMe}
               />
             </div>
@@ -356,7 +379,7 @@ export default function SearchPage() {
                     {r.title}
                   </div>
                   <div className="mt-1 text-xs text-slate-600 truncate">
-                    {r.category} • {r.city}
+                    {r.category} • {r.area || r.city}
                   </div>
                   {typeof r.distance_km === "number" ? (
                     <div className="mt-1 text-xs text-slate-500">
