@@ -7,6 +7,7 @@ import healthRoutes from "./routes/health.js";
 import authRoutes from "./routes/auth.js";
 import { sessionMiddleware } from "./middleware/session.js";
 import adminRoutes from "./routes/admin.js";
+import smartSearchRoutes from "./routes/smartSearch.js";
 import skillsRoutes from "./routes/skills.js";
 import eventsRoutes from "./routes/events.js";
 import analyticsRoutes from "./routes/analytics.js";
@@ -59,6 +60,7 @@ app.use(
 app.use(healthRoutes);
 app.use(authRoutes);
 app.use(adminRoutes);
+app.use(smartSearchRoutes);
 app.use(skillsRoutes);
 app.use("/events", eventsRoutes);
 app.use(analyticsRoutes);
